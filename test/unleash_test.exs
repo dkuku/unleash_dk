@@ -1,5 +1,6 @@
 defmodule UnleashTest do
   use ExUnit.Case
+
   import Mox
 
   describe "enabled?/2" do
@@ -202,59 +203,28 @@ defmodule UnleashTest do
           "name" => "test1",
           "description" => "Enabled toggle",
           "enabled" => true,
-          "strategies" => [
-            %{
-              "name" => "userWithId",
-              "parameters" => %{
-                "userIds" => "1"
-              }
-            }
-          ]
+          "strategies" => [%{"name" => "userWithId", "parameters" => %{"userIds" => "1"}}]
         },
         %{
           "name" => "test2",
           "description" => "Enabled toggle",
           "enabled" => true,
           "strategies" => [
-            %{
-              "name" => "gradualRolloutSessionId",
-              "parameters" => %{
-                "percentage" => "50",
-                "groupId" => "AB12A"
-              }
-            }
+            %{"name" => "gradualRolloutSessionId", "parameters" => %{"percentage" => "50", "groupId" => "AB12A"}}
           ]
         },
         %{
           "name" => "test3",
           "description" => "Enabled toggle",
           "enabled" => true,
-          "strategies" => [
-            %{
-              "name" => "remoteAddress",
-              "parameters" => %{
-                "IPs" => "127.0.0.1"
-              }
-            }
-          ]
+          "strategies" => [%{"name" => "remoteAddress", "parameters" => %{"IPs" => "127.0.0.1"}}]
         },
         %{
           "name" => "variant",
           "description" => "variant",
           "enabled" => true,
-          "strategies" => [
-            %{
-              "name" => "default",
-              "parameters" => %{}
-            }
-          ],
-          "variants" => [
-            %{
-              "name" => "variant1",
-              "weight" => 100,
-              "payload" => %{"type" => "string", "value" => "val1"}
-            }
-          ]
+          "strategies" => [%{"name" => "default", "parameters" => %{}}],
+          "variants" => [%{"name" => "variant1", "weight" => 100, "payload" => %{"type" => "string", "value" => "val1"}}]
         }
       ]
     }

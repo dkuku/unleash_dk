@@ -8,6 +8,7 @@ defmodule Unleash.Strategy.FlexibleRollout do
   """
 
   use Unleash.Strategy, name: "FlexibleRollout"
+
   alias Unleash.Strategy.Utils
 
   def enabled?(%{"rollout" => percentage} = params, context) when is_number(percentage) do
@@ -45,6 +46,5 @@ defmodule Unleash.Strategy.FlexibleRollout do
   defp stickiness("default", ctx), do: Map.get(ctx, :user_id, Map.get(ctx, :session_id, random()))
   defp stickiness("", ctx), do: stickiness("default", ctx)
 
-  defp random,
-    do: Integer.to_string(round(:rand.uniform() * 100) + 1)
+  defp random, do: Integer.to_string(round(:rand.uniform() * 100) + 1)
 end

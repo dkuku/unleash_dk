@@ -55,6 +55,7 @@ defmodule Unleash.MixProject do
       {:inch_ex, "~> 2.0", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.0", only: :dev, runtime: false},
       {:ex_doc, "~> 0.32", only: :dev, runtime: false},
+      {:styler, "~> 0.11", only: [:dev, :test], runtime: false},
       {:expublish, "~> 2.7", only: :dev, runtime: false},
       {:junit_formatter, "~> 3.0", only: :test},
       {:stream_data, "~> 0.4", only: [:test, :dev]},

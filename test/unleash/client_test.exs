@@ -26,14 +26,8 @@ defmodule Unleash.ClientTest do
 
   describe "features/1" do
     test "publishes start event" do
-      MojitoMock
-      |> expect(:get, fn _url, _headers ->
-        {:ok,
-         %Mojito.Response{
-           body: ~S({"version": "1", "features":[]}),
-           headers: [{"etag", "x"}],
-           status_code: 200
-         }}
+      expect(MojitoMock, :get, fn _url, _headers ->
+        {:ok, %Mojito.Response{body: ~S({"version": "1", "features":[]}), headers: [{"etag", "x"}], status_code: 200}}
       end)
 
       attach_telemetry_event([:unleash, :client, :fetch_features, :start])
@@ -53,14 +47,8 @@ defmodule Unleash.ClientTest do
     end
 
     test "publishes stop event" do
-      MojitoMock
-      |> expect(:get, fn _url, _headers ->
-        {:ok,
-         %Mojito.Response{
-           body: ~S({"version": "1", "features":[]}),
-           headers: [{"etag", "x"}],
-           status_code: 200
-         }}
+      expect(MojitoMock, :get, fn _url, _headers ->
+        {:ok, %Mojito.Response{body: ~S({"version": "1", "features":[]}), headers: [{"etag", "x"}], status_code: 200}}
       end)
 
       attach_telemetry_event([:unleash, :client, :fetch_features, :stop])
@@ -81,11 +69,7 @@ defmodule Unleash.ClientTest do
     end
 
     test "publishes stop event with an error" do
-      MojitoMock
-      |> expect(:get, fn _url, _headers ->
-        {:error, %Mojito.Error{message: "Network unavailable"}}
-      end)
-
+      expect(MojitoMock, :get, fn _url, _headers -> {:error, %Mojito.Error{message: "Network unavailable"}} end)
       attach_telemetry_event([:unleash, :client, :fetch_features, :stop])
 
       assert {nil, %Mojito.Error{}} = Client.features()
@@ -96,11 +80,7 @@ defmodule Unleash.ClientTest do
     end
 
     test "publishes exception event" do
-      MojitoMock
-      |> expect(:get, fn _url, _headers ->
-        raise "Unexpected error"
-      end)
-
+      expect(MojitoMock, :get, fn _url, _headers -> raise "Unexpected error" end)
       attach_telemetry_event([:unleash, :client, :fetch_features, :exception])
 
       assert_raise RuntimeError, fn -> Client.features() end
@@ -124,11 +104,7 @@ defmodule Unleash.ClientTest do
 
   describe "register_client/0" do
     test "publishes start event" do
-      MojitoMock
-      |> expect(:post, fn _url, _body, _headers ->
-        {:ok, %Mojito.Response{status_code: 200}}
-      end)
-
+      expect(MojitoMock, :post, fn _url, _body, _headers -> {:ok, %Mojito.Response{status_code: 200}} end)
       attach_telemetry_event([:unleash, :client, :register, :start])
 
       assert {:ok, %Mojito.Response{}} = Client.register_client()
@@ -150,11 +126,7 @@ defmodule Unleash.ClientTest do
     end
 
     test "publishes stop event with measurements" do
-      MojitoMock
-      |> expect(:post, fn _url, _body, _headers ->
-        {:ok, %Mojito.Response{status_code: 200}}
-      end)
-
+      expect(MojitoMock, :post, fn _url, _body, _headers -> {:ok, %Mojito.Response{status_code: 200}} end)
       attach_telemetry_event([:unleash, :client, :register, :stop])
 
       assert {:ok, %Mojito.Response{}} = Client.register_client()
@@ -177,11 +149,7 @@ defmodule Unleash.ClientTest do
     end
 
     test "publishes stop with an error event" do
-      MojitoMock
-      |> expect(:post, fn _url, _body, _headers ->
-        {:error, %Mojito.Error{message: "Network unavailable"}}
-      end)
-
+      expect(MojitoMock, :post, fn _url, _body, _headers -> {:error, %Mojito.Error{message: "Network unavailable"}} end)
       attach_telemetry_event([:unleash, :client, :register, :stop])
 
       assert {:error, %Mojito.Error{}} = Client.register_client()
@@ -192,11 +160,7 @@ defmodule Unleash.ClientTest do
     end
 
     test "publishes exception event with measurements" do
-      MojitoMock
-      |> expect(:post, fn _url, _body, _headers ->
-        raise "Unexpected error"
-      end)
-
+      expect(MojitoMock, :post, fn _url, _body, _headers -> raise "Unexpected error" end)
       attach_telemetry_event([:unleash, :client, :register, :exception])
 
       assert_raise RuntimeError, fn -> Client.register_client() end
@@ -224,11 +188,7 @@ defmodule Unleash.ClientTest do
 
   describe "metrics/1" do
     test "publishes start event" do
-      MojitoMock
-      |> expect(:post, fn _url, _body, _headers ->
-        {:ok, %Mojito.Response{status_code: 200}}
-      end)
-
+      expect(MojitoMock, :post, fn _url, _body, _headers -> {:ok, %Mojito.Response{status_code: 200}} end)
       attach_telemetry_event([:unleash, :client, :push_metrics, :start])
 
       payload = %{
@@ -258,11 +218,7 @@ defmodule Unleash.ClientTest do
     end
 
     test "publishes stop event with measurements" do
-      MojitoMock
-      |> expect(:post, fn _url, _body, _headers ->
-        {:ok, %Mojito.Response{status_code: 200}}
-      end)
-
+      expect(MojitoMock, :post, fn _url, _body, _headers -> {:ok, %Mojito.Response{status_code: 200}} end)
       attach_telemetry_event([:unleash, :client, :push_metrics, :stop])
 
       assert {:ok, %Mojito.Response{}} = Client.metrics(%{})
@@ -281,11 +237,7 @@ defmodule Unleash.ClientTest do
     end
 
     test "publishes stop with an error event" do
-      MojitoMock
-      |> expect(:post, fn _url, _body, _headers ->
-        {:error, %Mojito.Error{message: "Network unavailable"}}
-      end)
-
+      expect(MojitoMock, :post, fn _url, _body, _headers -> {:error, %Mojito.Error{message: "Network unavailable"}} end)
       attach_telemetry_event([:unleash, :client, :push_metrics, :stop])
 
       assert {:error, %Mojito.Error{}} = Client.metrics(%{})
@@ -296,11 +248,7 @@ defmodule Unleash.ClientTest do
     end
 
     test "publishes exception event with measurements" do
-      MojitoMock
-      |> expect(:post, fn _url, _body, _headers ->
-        raise "Unexpected error"
-      end)
-
+      expect(MojitoMock, :post, fn _url, _body, _headers -> raise "Unexpected error" end)
       attach_telemetry_event([:unleash, :client, :push_metrics, :exception])
 
       assert_raise RuntimeError, fn -> Client.metrics(%{}) end

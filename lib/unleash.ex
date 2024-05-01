@@ -39,15 +39,13 @@ defmodule Unleash do
   Aliased to `enabled?/2`
   """
   @spec is_enabled?(atom() | String.t(), boolean) :: boolean
-  def is_enabled?(feature, default) when is_boolean(default),
-    do: enabled?(feature, default)
+  def is_enabled?(feature, default) when is_boolean(default), do: enabled?(feature, default)
 
   @doc """
   Aliased to `enabled?/3`
   """
   @spec is_enabled?(atom() | String.t(), map(), boolean) :: boolean
-  def is_enabled?(feature, context \\ %{}, default \\ false),
-    do: enabled?(feature, context, default)
+  def is_enabled?(feature, context \\ %{}, default \\ false), do: enabled?(feature, context, default)
 
   @doc """
   Checks if the given feature is enabled. Checks as though an empty context was
@@ -62,8 +60,7 @@ defmodule Unleash do
       true
   """
   @spec enabled?(atom() | String.t(), boolean) :: boolean
-  def enabled?(feature, default) when is_boolean(default),
-    do: enabled?(feature, %{}, default)
+  def enabled?(feature, default) when is_boolean(default), do: enabled?(feature, %{}, default)
 
   @doc """
   Checks if the given feature is enabled.
@@ -146,8 +143,8 @@ defmodule Unleash do
       with false <- Config.disable_client(),
            feature when not is_nil(feature) <- Repo.get_feature(name),
            {result, metadata} <-
-             Variant.select_variant(feature, context),
-           metadata <- Map.merge(start_metadata, metadata) do
+             Variant.select_variant(feature, context) do
+        metadata = Map.merge(start_metadata, metadata)
         {result, metadata}
       else
         true ->

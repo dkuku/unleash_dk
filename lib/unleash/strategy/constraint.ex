@@ -12,10 +12,7 @@ defmodule Unleash.Strategy.Constraint do
     Enum.all?(constraints, &verify(&1, context))
   end
 
-  defp verify(
-         %{"contextName" => name, "operator" => op, "value" => value} = constraints,
-         context
-       ) do
+  defp verify(%{"contextName" => name, "operator" => op, "value" => value} = constraints, context) do
     context
     |> preprocess_value(constraints)
     |> find_value(name)
@@ -23,10 +20,7 @@ defmodule Unleash.Strategy.Constraint do
     |> postprocess_value(constraints)
   end
 
-  defp verify(
-         %{"contextName" => name, "operator" => op, "values" => values} = constraints,
-         context
-       ) do
+  defp verify(%{"contextName" => name, "operator" => op, "values" => values} = constraints, context) do
     context
     |> find_value(name)
     |> preprocess_value(constraints)
@@ -89,14 +83,11 @@ defmodule Unleash.Strategy.Constraint do
   defp check_multiple(value, "IN", values), do: value in values
   defp check_multiple(value, "NOT_IN", values), do: value not in values
 
-  defp check_multiple(value, "STR_CONTAINS", values),
-    do: Enum.any?(values, &String.contains?(value, &1))
+  defp check_multiple(value, "STR_CONTAINS", values), do: Enum.any?(values, &String.contains?(value, &1))
 
-  defp check_multiple(value, "STR_ENDS_WITH", values),
-    do: Enum.any?(values, &String.ends_with?(value, &1))
+  defp check_multiple(value, "STR_ENDS_WITH", values), do: Enum.any?(values, &String.ends_with?(value, &1))
 
-  defp check_multiple(value, "STR_STARTS_WITH", values),
-    do: Enum.any?(values, &String.starts_with?(value, &1))
+  defp check_multiple(value, "STR_STARTS_WITH", values), do: Enum.any?(values, &String.starts_with?(value, &1))
 
   defp find_value(nil, _name), do: nil
 

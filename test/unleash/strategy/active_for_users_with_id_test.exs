@@ -1,8 +1,8 @@
 defmodule Unleash.Strategy.ActiveForUsersWithIdTest do
-  alias Unleash.Strategy.ActiveForUsersWithId
-
   use ExUnit.Case
   use ExUnitProperties
+
+  alias Unleash.Strategy.ActiveForUsersWithId
 
   describe "enabled?" do
     property "returns true if the user is in the list" do

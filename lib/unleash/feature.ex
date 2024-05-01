@@ -25,11 +25,9 @@ defmodule Unleash.Feature do
 
   def enabled?(nil, _context), do: {false, []}
 
-  def enabled?(%__MODULE__{enabled: enabled, strategies: []}, _context),
-    do: {enabled, []}
+  def enabled?(%__MODULE__{enabled: enabled, strategies: []}, _context), do: {enabled, []}
 
-  def enabled?(%__MODULE__{enabled: enabled, strategies: strat}, context)
-      when is_list(strat) do
+  def enabled?(%__MODULE__{enabled: enabled, strategies: strat}, context) when is_list(strat) do
     strategy_evaluations =
       Enum.map(strat, fn strategy ->
         {strategy["name"], Strategy.enabled?(strategy, context)}

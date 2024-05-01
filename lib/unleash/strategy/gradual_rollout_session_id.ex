@@ -8,6 +8,7 @@ defmodule Unleash.Strategy.GradualRolloutSessionId do
   """
 
   use Unleash.Strategy, name: "GradualRolloutSessionId"
+
   alias Unleash.Strategy.Utils
 
   def enabled?(_params, %{session_id: ""}), do: false
@@ -22,7 +23,7 @@ defmodule Unleash.Strategy.GradualRolloutSessionId do
     result =
       percentage
       |> Utils.parse_int()
-      |> (&(&1 > 0 and Utils.normalize(session_id, group_id) <= &1)).()
+      |> then(&(&1 > 0 and Utils.normalize(session_id, group_id) <= &1))
 
     {result, %{group: group_id, session: session_id, percentage: percentage}}
   end

@@ -16,8 +16,7 @@ defmodule Unleash.Variant do
           optional(:payload) => map()
         }
 
-  def select_variant(%Feature{variants: variants} = feature, context)
-      when is_list(variants) and variants != [] do
+  def select_variant(%Feature{variants: variants} = feature, context) when is_list(variants) and variants != [] do
     {variant, metadata} =
       case Feature.enabled?(feature, context) do
         {true, _} -> variants(feature, context)
@@ -106,8 +105,7 @@ defmodule Unleash.Variant do
     }
   end
 
-  defp variants(%Feature{variants: variants, name: name}, context)
-       when is_list(variants) and variants != [] do
+  defp variants(%Feature{variants: variants, name: name}, context) when is_list(variants) and variants != [] do
     total_weight =
       for %{weight: weight} <- variants, reduce: 0 do
         acc -> weight + acc

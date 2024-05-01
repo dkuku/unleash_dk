@@ -19,46 +19,38 @@ defmodule Unleash.Config do
   ]
 
   def url do
-    application_env()
-    |> Keyword.fetch!(:url)
+    Keyword.fetch!(application_env(), :url)
   end
 
   def test? do
-    application_env()
-    |> Keyword.fetch!(:app_env) == :test
+    Keyword.fetch!(application_env(), :app_env) == :test
   end
 
   def appname do
-    application_env()
-    |> Keyword.fetch!(:appname)
+    Keyword.fetch!(application_env(), :appname)
   end
 
   def instance_id do
-    application_env()
-    |> Keyword.fetch!(:instance_id)
+    Keyword.fetch!(application_env(), :instance_id)
   end
 
   def metrics_period do
-    application_env()
-    |> Keyword.fetch!(:metrics_period)
+    Keyword.fetch!(application_env(), :metrics_period)
   end
 
   def features_period do
-    application_env()
-    |> Keyword.fetch!(:features_period)
+    Keyword.fetch!(application_env(), :features_period)
   end
 
   def strategies do
     strategy_module =
-      application_env()
-      |> Keyword.fetch!(:strategies)
+      Keyword.fetch!(application_env(), :strategies)
 
     strategy_module.strategies
   end
 
   def strategy_names do
-    strategies()
-    |> Enum.map(fn {n, _} -> n end)
+    Enum.map(strategies(), fn {n, _} -> n end)
   end
 
   def backup_file do
@@ -71,38 +63,31 @@ defmodule Unleash.Config do
   end
 
   def backup_dir do
-    backup_file()
-    |> Path.dirname()
+    Path.dirname(backup_file())
   end
 
   def custom_headers do
-    application_env()
-    |> Keyword.fetch!(:custom_http_headers)
+    Keyword.fetch!(application_env(), :custom_http_headers)
   end
 
   def disable_client do
-    application_env()
-    |> Keyword.fetch!(:disable_client)
+    Keyword.fetch!(application_env(), :disable_client)
   end
 
   def disable_metrics do
-    application_env()
-    |> Keyword.fetch!(:disable_metrics)
+    Keyword.fetch!(application_env(), :disable_metrics)
   end
 
   def retries do
-    application_env()
-    |> Keyword.fetch!(:retries)
+    Keyword.fetch!(application_env(), :retries)
   end
 
   def client do
-    application_env()
-    |> Keyword.fetch!(:client)
+    Keyword.fetch!(application_env(), :client)
   end
 
   def http_client do
-    application_env()
-    |> Keyword.fetch!(:http_client)
+    Keyword.fetch!(application_env(), :http_client)
   end
 
   defp application_env do

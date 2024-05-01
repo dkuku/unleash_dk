@@ -9,7 +9,6 @@ defmodule Unleash.ClientSpecificationTest do
          |> Jason.decode!()
   @specs
   |> List.wrap()
-  |> Enum.reject(fn path -> path =~ "08" end)
   |> Enum.reject(fn path -> path =~ "15" end)
   |> Enum.reject(fn path -> path =~ "16" end)
   |> Enum.reject(fn path -> path =~ "17" end)
@@ -36,13 +35,7 @@ defmodule Unleash.ClientSpecificationTest do
         :ok
       end
 
-      tests
-      |> Enum.each(fn %{
-                        "context" => ctx,
-                        "description" => t,
-                        "expectedResult" => expected,
-                        "toggleName" => feature
-                      } ->
+      Enum.each(tests, fn %{"context" => ctx, "description" => t, "expectedResult" => expected, "toggleName" => feature} ->
         @context ctx
         @feature feature
         @expected expected
@@ -54,26 +47,24 @@ defmodule Unleash.ClientSpecificationTest do
 
           Process.sleep(50)
 
-          if not result do
+          unless result do
             IO.inspect("------------------------------------------")
             IO.inspect(context)
             IO.inspect(@feature)
 
-            Unleash.Repo.get_feature(@feature)
-            |> IO.inspect()
+            @feature |> Unleash.Repo.get_feature() |> IO.inspect()
 
             assert result
           end
         end
       end)
 
-      variant_tests
-      |> Enum.each(fn %{
-                        "context" => ctx,
-                        "description" => t,
-                        "expectedResult" => expected,
-                        "toggleName" => feature
-                      } ->
+      Enum.each(variant_tests, fn %{
+                                    "context" => ctx,
+                                    "description" => t,
+                                    "expectedResult" => expected,
+                                    "toggleName" => feature
+                                  } ->
         @context ctx
         @feature feature
         @expected Map.delete(expected, "feature_enabled")
@@ -83,13 +74,12 @@ defmodule Unleash.ClientSpecificationTest do
 
           result = entity_from_file(@expected) == Unleash.get_variant(@feature, context)
 
-          if not result do
+          unless result do
             IO.inspect("------------------------------------------")
             IO.inspect(context)
             IO.inspect(@feature)
 
-            Unleash.Repo.get_feature(@feature)
-            |> IO.inspect()
+            @feature |> Unleash.Repo.get_feature() |> IO.inspect()
 
             assert result
           end
@@ -99,12 +89,10 @@ defmodule Unleash.ClientSpecificationTest do
   end)
 
   defp entity_from_file(e) do
-    e
-    |> Enum.map(fn
+    Map.new(e, fn
       {"payload", v} -> {:payload, v}
       {k, v} when is_map(v) -> {String.to_atom(Recase.to_snake(k)), entity_from_file(v)}
       {k, v} -> {String.to_atom(Recase.to_snake(k)), v}
     end)
-    |> Enum.into(%{})
   end
 end
