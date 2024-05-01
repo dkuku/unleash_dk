@@ -27,16 +27,16 @@ defmodule Unleash.Strategy.Constraint do
   defp preprocess_value(value, %{"caseInsensitive" => true}), do: String.downcase(value)
   defp preprocess_value(value, _), do: value
 
+  defp check(val1, "DATE_AFTER", %{"value" => val2}), do: compare_date(val1, val2, :gt)
+  defp check(val1, "DATE_BEFORE", %{"value" => val2}), do: compare_date(val1, val2, :lt)
+  defp check(val1, "NUM_EQ", %{"value" => val2}), do: compare_num(val1, val2, :eq)
+  defp check(val1, "NUM_GT", %{"value" => val2}), do: compare_num(val1, val2, :gt)
+  defp check(val1, "NUM_GTE", %{"value" => val2}), do: compare_num(val1, val2, :gte)
+  defp check(val1, "NUM_LT", %{"value" => val2}), do: compare_num(val1, val2, :lt)
+  defp check(val1, "NUM_LTE", %{"value" => val2}), do: compare_num(val1, val2, :lte)
   defp check(val1, "SEMVER_EQ", %{"value" => val2}), do: compare_semver(val1, val2, :eq)
   defp check(val1, "SEMVER_GT", %{"value" => val2}), do: compare_semver(val1, val2, :gt)
   defp check(val1, "SEMVER_LT", %{"value" => val2}), do: compare_semver(val1, val2, :lt)
-  defp check(val1, "NUM_EQ", %{"value" => val2}), do: compare_num(val1, val2, :eq)
-  defp check(val1, "NUM_GT", %{"value" => val2}), do: compare_num(val1, val2, :gt)
-  defp check(val1, "NUM_LT", %{"value" => val2}), do: compare_num(val1, val2, :lt)
-  defp check(val1, "NUM_LTE", %{"value" => val2}), do: compare_num(val1, val2, :lte)
-  defp check(val1, "NUM_GTE", %{"value" => val2}), do: compare_num(val1, val2, :gte)
-  defp check(val1, "DATE_AFTER", %{"value" => val2}), do: compare_date(val1, val2, :gt)
-  defp check(val1, "DATE_BEFORE", %{"value" => val2}), do: compare_date(val1, val2, :lt)
   defp check(val, "IN", %{"values" => values}), do: val in values
   defp check(val, "NOT_IN", %{"values" => values}), do: val not in values
   defp check(val, "STR_CONTAINS", %{"values" => values}), do: Enum.any?(values, &String.contains?(val, &1))
