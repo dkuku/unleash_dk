@@ -78,8 +78,8 @@ defmodule Unleash.PlugTest do
           |> Plug.call(@opts)
 
         assert %{
-                 user_id: user_id,
-                 session_id: session_id,
+                 user_id: _user_id,
+                 session_id: _session_id,
                  remote_address: "127.0.0.1"
                } = conn.assigns[:unleash_context]
       end
@@ -99,8 +99,8 @@ defmodule Unleash.PlugTest do
           |> Plug.call(opts)
 
         assert %{
-                 user_id: user_id,
-                 session_id: session_id,
+                 user_id: _user_id,
+                 session_id: _session_id,
                  remote_address: "127.0.0.1"
                } = conn.assigns[:unleash_context]
       end

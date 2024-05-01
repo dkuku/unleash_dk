@@ -3,8 +3,6 @@ defmodule Unleash.Variant do
   alias Unleash.Feature
   alias Unleash.Strategy.Utils
 
-  @sticky_props [:user_id, :session_id, :remote_address]
-
   @derive Jason.Encoder
   defstruct name: "",
             weight: 0,
@@ -19,7 +17,7 @@ defmodule Unleash.Variant do
         }
 
   def select_variant(%Feature{variants: variants} = feature, context)
-      when is_list(variants) and length(variants) > 0 do
+      when is_list(variants) and variants != [] do
     {variant, metadata} =
       case Feature.enabled?(feature, context) do
         {true, _} -> variants(feature, context)
@@ -79,25 +77,27 @@ defmodule Unleash.Variant do
 
   defp check_variant_for_override(%__MODULE__{overrides: overrides}, context) do
     Enum.any?(overrides, fn %{"contextName" => name, "values" => values} ->
-      Enum.any?(values, fn v -> v === context[get_context_name(name)] end)
+      Enum.any?(values, fn v -> v === get_in(context, get_context_name(name)) end)
     end)
   end
 
   defp get_seed(context) do
-    context
-    |> Enum.filter(fn {k, _} ->
-      Enum.member?(@sticky_props, k)
-    end)
-    |> Enum.at(0)
-    |> case do
+    with nil <- Map.get(context, :session_id),
+         nil <- Map.get(context, :user_id),
+         nil <- Map.get(context, :remoteAddress),
+         properties when not is_nil(properties) <- Map.get(context, :properties),
+         nil <- Map.get(properties, :custom_field) do
+      to_string(:rand.uniform(100_000))
+    else
       nil -> to_string(:rand.uniform(100_000))
-      {_, v} -> v
+      not_nil_value -> not_nil_value
     end
   end
 
-  defp get_context_name("userId"), do: :user_id
-  defp get_context_name("sessionId"), do: :session_id
-  defp get_context_name("remoteAddress"), do: :remote_address
+  defp get_context_name("userId"), do: [:user_id]
+  defp get_context_name("sessionId"), do: [:session_id]
+  defp get_context_name("remoteAddress"), do: [:remote_address]
+  defp get_context_name("customField"), do: [:properties, :custom_field]
 
   def disabled do
     %{
@@ -107,11 +107,11 @@ defmodule Unleash.Variant do
   end
 
   defp variants(%Feature{variants: variants, name: name}, context)
-       when is_list(variants) and length(variants) > 0 do
+       when is_list(variants) and variants != [] do
     total_weight =
-      variants
-      |> Enum.map(fn %{weight: w} -> w end)
-      |> Enum.sum()
+      for %{weight: weight} <- variants, reduce: 0 do
+        acc -> weight + acc
+      end
 
     variants
     |> find_override(context)
@@ -120,7 +120,7 @@ defmodule Unleash.Variant do
         variant =
           find_variant(
             variants,
-            Utils.normalize(get_seed(context), name, total_weight)
+            Utils.normalize_variant(get_seed(context), name, total_weight)
           )
 
         {to_map(variant, true), %{reason: :variant_selected}}

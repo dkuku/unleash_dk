@@ -18,32 +18,31 @@ defmodule Unleash.Strategy.FlexibleRollout do
 
     group = Map.get(params, "groupId", Map.get(params, :feature_toggle, ""))
 
-    if sticky_value do
-      {percentage > 0 and Utils.normalize(sticky_value, group) <= percentage,
-       %{
-         group: group,
-         percentage: percentage,
-         sticky_value: sticky_value,
-         stickiness: Map.get(params, "stickiness")
-       }}
-    else
-      {false,
-       %{
-         group: group,
-         percentage: percentage,
-         sticky_value: sticky_value,
-         stickiness: Map.get(params, "stickiness")
-       }}
-    end
+    enabled? =
+      if sticky_value do
+        percentage > 0 and Utils.normalize(sticky_value, group) <= percentage
+      else
+        false
+      end
+
+    {enabled?,
+     %{
+       group: group,
+       percentage: percentage,
+       sticky_value: sticky_value,
+       stickiness: Map.get(params, "stickiness")
+     }}
   end
 
-  def enabled?(%{"rollout" => percentage} = params, context),
-    do: enabled?(%{params | "rollout" => Utils.parse_int(percentage)}, context)
+  def enabled?(%{"rollout" => percentage} = params, context) when is_binary(percentage) do
+    enabled?(%{params | "rollout" => Utils.parse_int(percentage)}, context)
+  end
 
-  defp stickiness("default", ctx), do: Map.get(ctx, :user_id, Map.get(ctx, :session_id, random()))
   defp stickiness("userId", ctx), do: ctx[:user_id]
   defp stickiness("sessionId", ctx), do: ctx[:session_id]
   defp stickiness("random", _ctx), do: random()
+  defp stickiness("customField", ctx), do: get_in(ctx, [:properties, :custom_field])
+  defp stickiness("default", ctx), do: Map.get(ctx, :user_id, Map.get(ctx, :session_id, random()))
   defp stickiness("", ctx), do: stickiness("default", ctx)
 
   defp random,

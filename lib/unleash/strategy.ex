@@ -70,7 +70,10 @@ defmodule Unleash.Strategy do
       Config.strategies()
       |> Enum.find(fn {n, _mod} -> n == name end)
 
-    check_constraints(strategy, context) and module.check_enabled(strategy["parameters"], context)
+    {check_constraints(strategy, context), module.check_enabled(strategy["parameters"], context)}
+
+    check_constraints(strategy, context) and
+      module.check_enabled(strategy["parameters"], context)
   end
 
   def enabled?(_strat, _context), do: false
