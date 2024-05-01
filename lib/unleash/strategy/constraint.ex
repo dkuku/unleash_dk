@@ -12,19 +12,11 @@ defmodule Unleash.Strategy.Constraint do
     Enum.all?(constraints, &verify(&1, context))
   end
 
-  defp verify(%{"contextName" => name, "operator" => op, "value" => value} = constraints, context) do
-    context
-    |> preprocess_value(constraints)
-    |> find_value(name)
-    |> check_single(op, value)
-    |> postprocess_value(constraints)
-  end
-
-  defp verify(%{"contextName" => name, "operator" => op, "values" => values} = constraints, context) do
+  defp verify(%{"contextName" => name, "operator" => op} = constraints, context) do
     context
     |> find_value(name)
     |> preprocess_value(constraints)
-    |> check_multiple(op, values)
+    |> check(op, constraints)
     |> postprocess_value(constraints)
   end
 
@@ -35,17 +27,22 @@ defmodule Unleash.Strategy.Constraint do
   defp preprocess_value(value, %{"caseInsensitive" => true}), do: String.downcase(value)
   defp preprocess_value(value, _), do: value
 
-  defp check_single(ver1, "SEMVER_EQ", ver2), do: compare_semver(ver1, ver2, :eq)
-  defp check_single(ver1, "SEMVER_GT", ver2), do: compare_semver(ver1, ver2, :gt)
-  defp check_single(ver1, "SEMVER_LT", ver2), do: compare_semver(ver1, ver2, :lt)
-  defp check_single(ver1, "NUM_EQ", ver2), do: compare_num(ver1, ver2, :eq)
-  defp check_single(ver1, "NUM_GT", ver2), do: compare_num(ver1, ver2, :gt)
-  defp check_single(ver1, "NUM_LT", ver2), do: compare_num(ver1, ver2, :lt)
-  defp check_single(ver1, "NUM_LTE", ver2), do: compare_num(ver1, ver2, :lte)
-  defp check_single(ver1, "NUM_GTE", ver2), do: compare_num(ver1, ver2, :gte)
-  defp check_single(ver1, "DATE_AFTER", ver2), do: compare_date(ver1, ver2, :gt)
-  defp check_single(ver1, "DATE_BEFORE", ver2), do: compare_date(ver1, ver2, :lt)
-  defp check_single(_ver1, "NOT_A_VALID_OPERATOR", _ver2), do: false
+  defp check(val1, "SEMVER_EQ", %{"value" => val2}), do: compare_semver(val1, val2, :eq)
+  defp check(val1, "SEMVER_GT", %{"value" => val2}), do: compare_semver(val1, val2, :gt)
+  defp check(val1, "SEMVER_LT", %{"value" => val2}), do: compare_semver(val1, val2, :lt)
+  defp check(val1, "NUM_EQ", %{"value" => val2}), do: compare_num(val1, val2, :eq)
+  defp check(val1, "NUM_GT", %{"value" => val2}), do: compare_num(val1, val2, :gt)
+  defp check(val1, "NUM_LT", %{"value" => val2}), do: compare_num(val1, val2, :lt)
+  defp check(val1, "NUM_LTE", %{"value" => val2}), do: compare_num(val1, val2, :lte)
+  defp check(val1, "NUM_GTE", %{"value" => val2}), do: compare_num(val1, val2, :gte)
+  defp check(val1, "DATE_AFTER", %{"value" => val2}), do: compare_date(val1, val2, :gt)
+  defp check(val1, "DATE_BEFORE", %{"value" => val2}), do: compare_date(val1, val2, :lt)
+  defp check(val, "IN", %{"values" => values}), do: val in values
+  defp check(val, "NOT_IN", %{"values" => values}), do: val not in values
+  defp check(val, "STR_CONTAINS", %{"values" => values}), do: Enum.any?(values, &String.contains?(val, &1))
+  defp check(val, "STR_ENDS_WITH", %{"values" => values}), do: Enum.any?(values, &String.ends_with?(val, &1))
+  defp check(val, "STR_STARTS_WITH", %{"values" => values}), do: Enum.any?(values, &String.starts_with?(val, &1))
+  defp check(_val, _, _), do: false
 
   defp compare_semver(ver1, ver2, equality) do
     with {:ok, v1} <- Version.parse(ver1),
@@ -56,9 +53,9 @@ defmodule Unleash.Strategy.Constraint do
     end
   end
 
-  defp compare_num(ver1, ver2, equality) do
-    with {v1, ""} <- Float.parse(ver1),
-         {v2, ""} <- Float.parse(ver2) do
+  defp compare_num(v1, v2, equality) do
+    with {v1, ""} <- Float.parse(v1),
+         {v2, ""} <- Float.parse(v2) do
       case equality do
         :eq -> v1 == v2
         :lt -> v1 < v2
@@ -71,23 +68,14 @@ defmodule Unleash.Strategy.Constraint do
     end
   end
 
-  defp compare_date(ver1, ver2, equality) do
-    with {:ok, utc_date1, _offset} <- DateTime.from_iso8601(ver1),
-         {:ok, utc_date2, _offset} <- DateTime.from_iso8601(ver2) do
+  defp compare_date(v1, v2, equality) do
+    with {:ok, utc_date1, _offset} <- DateTime.from_iso8601(v1),
+         {:ok, utc_date2, _offset} <- DateTime.from_iso8601(v2) do
       DateTime.compare(utc_date1, utc_date2) == equality
     else
       _ -> false
     end
   end
-
-  defp check_multiple(value, "IN", values), do: value in values
-  defp check_multiple(value, "NOT_IN", values), do: value not in values
-
-  defp check_multiple(value, "STR_CONTAINS", values), do: Enum.any?(values, &String.contains?(value, &1))
-
-  defp check_multiple(value, "STR_ENDS_WITH", values), do: Enum.any?(values, &String.ends_with?(value, &1))
-
-  defp check_multiple(value, "STR_STARTS_WITH", values), do: Enum.any?(values, &String.starts_with?(value, &1))
 
   defp find_value(nil, _name), do: nil
 
