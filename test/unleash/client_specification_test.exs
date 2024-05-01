@@ -43,19 +43,7 @@ defmodule Unleash.ClientSpecificationTest do
         test t do
           context = entity_from_file(@context)
 
-          result = @expected == Unleash.enabled?(@feature, context)
-
-          Process.sleep(50)
-
-          unless result do
-            IO.inspect("------------------------------------------")
-            IO.inspect(context)
-            IO.inspect(@feature)
-
-            @feature |> Unleash.Repo.get_feature() |> IO.inspect()
-
-            assert result
-          end
+          assert @expected == Unleash.enabled?(@feature, context)
         end
       end)
 
@@ -73,16 +61,6 @@ defmodule Unleash.ClientSpecificationTest do
           context = entity_from_file(@context)
 
           result = entity_from_file(@expected) == Unleash.get_variant(@feature, context)
-
-          unless result do
-            IO.inspect("------------------------------------------")
-            IO.inspect(context)
-            IO.inspect(@feature)
-
-            @feature |> Unleash.Repo.get_feature() |> IO.inspect()
-
-            assert result
-          end
         end
       end)
     end
