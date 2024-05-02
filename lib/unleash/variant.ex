@@ -24,7 +24,7 @@ defmodule Unleash.Variant do
       end
 
     common_metadata = %{
-      seed: get_seed(context),
+      seed: get_seed(context, feature),
       variants: Enum.map(variants, &{&1.name, &1.weight})
     }
 
@@ -80,23 +80,21 @@ defmodule Unleash.Variant do
     end)
   end
 
-  defp get_seed(context) do
+  defp get_seed(context, feature) do
     with nil <- Map.get(context, :session_id),
          nil <- Map.get(context, :user_id),
-         nil <- Map.get(context, :remote_address),
-         properties when not is_nil(properties) <- Map.get(context, :properties),
-         nil <- Map.get(properties, :custom_field) do
-      to_string(:rand.uniform(100_000))
-    else
-      nil -> to_string(:rand.uniform(100_000))
-      not_nil_value -> not_nil_value
+         nil <- Map.get(context, :remote_address) do
+      case get_in(feature.strategies, [Access.at(0), "parameters", "stickiness"]) do
+        nil -> to_string(:rand.uniform(100_000))
+        custom_name -> get_in(context, [:properties, String.to_atom(Recase.to_snake(custom_name))])
+      end
     end
   end
 
   defp get_context_name("userId"), do: [:user_id]
   defp get_context_name("sessionId"), do: [:session_id]
   defp get_context_name("remoteAddress"), do: [:remote_address]
-  defp get_context_name("customField"), do: [:properties, :custom_field]
+  defp get_context_name(custom_name), do: [:properties, String.to_atom(Recase.to_snake(custom_name))]
 
   def disabled do
     %{
@@ -105,7 +103,7 @@ defmodule Unleash.Variant do
     }
   end
 
-  defp variants(%Feature{variants: variants, name: name}, context) when is_list(variants) and variants != [] do
+  defp variants(%Feature{variants: variants} = feature, context) when is_list(variants) and variants != [] do
     total_weight =
       for %{weight: weight} <- variants, reduce: 0 do
         acc -> weight + acc
@@ -115,11 +113,9 @@ defmodule Unleash.Variant do
     |> find_override(context)
     |> case do
       nil ->
-        variant =
-          find_variant(
-            variants,
-            Utils.normalize_variant(get_seed(context), name, total_weight)
-          )
+        seed = get_seed(context, feature)
+        normalized_variant = Utils.normalize_variant(seed, feature.name, total_weight)
+        variant = find_variant(variants, normalized_variant)
 
         {to_map(variant, true), %{reason: :variant_selected}}
 

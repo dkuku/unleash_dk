@@ -12,11 +12,7 @@ defmodule Unleash.Strategy.FlexibleRollout do
   alias Unleash.Strategy.Utils
 
   def enabled?(%{"rollout" => percentage} = params, context) when is_number(percentage) do
-    sticky_value =
-      params
-      |> Map.get("stickiness", "")
-      |> stickiness(context)
-
+    sticky_value = params |> Map.get("stickiness", "") |> stickiness(context)
     group = Map.get(params, "groupId", Map.get(params, :feature_toggle, ""))
 
     enabled? =
@@ -42,9 +38,9 @@ defmodule Unleash.Strategy.FlexibleRollout do
   defp stickiness("userId", ctx), do: ctx[:user_id]
   defp stickiness("sessionId", ctx), do: ctx[:session_id]
   defp stickiness("random", _ctx), do: random()
-  defp stickiness("customField", ctx), do: get_in(ctx, [:properties, :custom_field])
   defp stickiness("default", ctx), do: Map.get(ctx, :user_id, Map.get(ctx, :session_id, random()))
   defp stickiness("", ctx), do: stickiness("default", ctx)
+  defp stickiness(custom_name, ctx), do: get_in(ctx, [:properties, String.to_atom(Recase.to_snake(custom_name))])
 
   defp random, do: Integer.to_string(round(:rand.uniform() * 100) + 1)
 end

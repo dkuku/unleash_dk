@@ -140,18 +140,14 @@ defmodule Unleash do
 
   defp do_get_variant(name, start_metadata, context, fallback) do
     {result, metadata} =
-      with false <- Config.disable_client(),
-           feature when not is_nil(feature) <- Repo.get_feature(name),
-           {result, metadata} <-
-             Variant.select_variant(feature, context) do
+      with {_, false} <- {:disable, Config.disable_client()},
+           {_, feature} when not is_nil(feature) <- {:feature, Repo.get_feature(name)} do
+        {result, metadata} = Variant.select_variant(feature, context)
         metadata = Map.merge(start_metadata, metadata)
         {result, metadata}
       else
-        true ->
-          {fallback, %{reason: :disabled_client}}
-
-        nil ->
-          {fallback, %{reason: :feature_not_found}}
+        {:disable, _} -> {fallback, %{reason: :disabled_client}}
+        {:feature, nil} -> {fallback, %{reason: :feature_not_found}}
       end
 
     {result, start_metadata |> Map.put(:result, result) |> Map.merge(metadata)}
@@ -159,8 +155,8 @@ defmodule Unleash do
 
   defp do_enabled(name, start_metadata, context, fallback) do
     {result, metadata} =
-      with false <- Config.disable_client(),
-           feature when not is_nil(feature) <- Repo.get_feature(name) do
+      with {_, false} <- {:disable, Config.disable_client()},
+           {_, feature} when not is_nil(feature) <- {:feature, Repo.get_feature(name)} do
         context = Map.put(context, :feature_toggle, feature.name)
 
         {result, strategy_evaluations} =
@@ -176,11 +172,8 @@ defmodule Unleash do
 
         {result, metadata}
       else
-        true ->
-          {fallback, %{reason: :disabled_client}}
-
-        nil ->
-          {fallback, %{reason: :feature_not_found}}
+        {:disable, _} -> {fallback, %{reason: :disabled_client}}
+        {:feature, nil} -> {fallback, %{reason: :feature_not_found}}
       end
 
     {result, start_metadata |> Map.put(:result, result) |> Map.merge(metadata)}
