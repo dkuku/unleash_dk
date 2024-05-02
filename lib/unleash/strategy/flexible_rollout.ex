@@ -15,20 +15,15 @@ defmodule Unleash.Strategy.FlexibleRollout do
     sticky_value = params |> Map.get("stickiness", "") |> stickiness(context)
     group = Map.get(params, "groupId", Map.get(params, :feature_toggle, ""))
 
-    enabled? =
-      if sticky_value do
-        percentage > 0 and Utils.normalize(sticky_value, group) <= percentage
-      else
-        false
-      end
-
-    {enabled?,
-     %{
-       group: group,
-       percentage: percentage,
-       sticky_value: sticky_value,
-       stickiness: Map.get(params, "stickiness")
-     }}
+    {
+      sticky_value and percentage > 0 and Utils.normalize(sticky_value, group) <= percentage,
+      %{
+        group: group,
+        percentage: percentage,
+        sticky_value: sticky_value,
+        stickiness: Map.get(params, "stickiness")
+      }
+    }
   end
 
   def enabled?(%{"rollout" => percentage} = params, context) when is_binary(percentage) do
