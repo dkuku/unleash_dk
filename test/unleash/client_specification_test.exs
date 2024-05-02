@@ -60,7 +60,7 @@ defmodule Unleash.ClientSpecificationTest do
         test t do
           context = entity_from_file(@context)
 
-          result = entity_from_file(@expected) == Unleash.get_variant(@feature, context)
+          assert entity_from_file(@expected) == Unleash.get_variant(@feature, context)
         end
       end)
     end
