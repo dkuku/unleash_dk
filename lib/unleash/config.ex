@@ -46,7 +46,7 @@ defmodule Unleash.Config do
     strategy_module =
       Keyword.fetch!(application_env(), :strategies)
 
-    strategy_module.strategies
+    strategy_module.strategies()
   end
 
   def strategy_names do
