@@ -83,7 +83,7 @@ defmodule Unleash.Variant do
   defp get_seed(context) do
     with nil <- Map.get(context, :session_id),
          nil <- Map.get(context, :user_id),
-         nil <- Map.get(context, :remoteAddress),
+         nil <- Map.get(context, :remote_address),
          properties when not is_nil(properties) <- Map.get(context, :properties),
          nil <- Map.get(properties, :custom_field) do
       to_string(:rand.uniform(100_000))
