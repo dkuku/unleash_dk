@@ -16,7 +16,7 @@ defmodule Unleash.Strategy.FlexibleRollout do
     group = Map.get(params, "groupId", Map.get(params, :feature_toggle, ""))
 
     {
-      sticky_value and percentage > 0 and Utils.normalize(sticky_value, group) <= percentage,
+      !!sticky_value and percentage > 0 and Utils.normalize(sticky_value, group) <= percentage,
       %{
         group: group,
         percentage: percentage,

@@ -6,6 +6,23 @@ defmodule Unleash.Strategy.Constraint do
 
   These constraints allow for very complex and specifc strategies to be
   enacted by allowing users to specify context values to include or exclude.
+
+  - DATE_AFTER
+  - DATE_BEFORE
+  - IN
+  - NOT_IN
+  - NUM_EQ
+  - NUM_GT
+  - NUM_GTE
+  - NUM_LT
+  - NUM_LTE
+  - SEMVER_EQ
+  - SEMVER_GT
+  - SEMVER_LT
+  - STR_CONTAINS
+  - STR_ENDS_WITH
+  - STR_STARTS_WITH
+
   """
 
   def verify_all(constraints, context) do
@@ -44,16 +61,18 @@ defmodule Unleash.Strategy.Constraint do
   defp check(val, "STR_STARTS_WITH", %{"values" => values}), do: Enum.any?(values, &String.starts_with?(val, &1))
   defp check(_val, _, _), do: false
 
-  defp compare_semver(ver1, ver2, equality) do
-    with {:ok, v1} <- Version.parse(ver1),
-         {:ok, v2} <- Version.parse(ver2) do
+  defp compare_semver(v1, v2, equality) when is_binary(v1) and is_binary(v2) do
+    with {:ok, v1} <- Version.parse(v1),
+         {:ok, v2} <- Version.parse(v2) do
       Version.compare(v1, v2) == equality
     else
       _ -> false
     end
   end
 
-  defp compare_num(v1, v2, equality) do
+  defp compare_semver(_v1, _v2, _equality), do: false
+
+  defp compare_num(v1, v2, equality) when is_binary(v1) and is_binary(v2) do
     with {v1, ""} <- Float.parse(v1),
          {v2, ""} <- Float.parse(v2) do
       case equality do
@@ -68,7 +87,9 @@ defmodule Unleash.Strategy.Constraint do
     end
   end
 
-  defp compare_date(v1, v2, equality) do
+  defp compare_num(_v1, _v2, _equality), do: false
+
+  defp compare_date(v1, v2, equality) when is_binary(v1) and is_binary(v2) do
     with {:ok, utc_date1, _offset} <- DateTime.from_iso8601(v1),
          {:ok, utc_date2, _offset} <- DateTime.from_iso8601(v2) do
       DateTime.compare(utc_date1, utc_date2) == equality
@@ -76,6 +97,8 @@ defmodule Unleash.Strategy.Constraint do
       _ -> false
     end
   end
+
+  defp compare_date(_v1, _v2, _equality), do: false
 
   defp find_value(nil, _name), do: nil
 
