@@ -7,12 +7,12 @@ defmodule UnleashTest do
     setup :start_repo
 
     test "should send an empty context" do
-      Application.put_env(:unleash, Unleash, [])
+      Application.put_env(:unleash_fresha, Unleash, [])
       refute Unleash.enabled?(:test1, true)
     end
 
     test "should emit evaluation series on stop when applicable" do
-      Application.put_env(:unleash, Unleash, [])
+      Application.put_env(:unleash_fresha, Unleash, [])
 
       attach_telemetry_event([:unleash, :feature, :enabled?, :stop])
 
@@ -32,7 +32,7 @@ defmodule UnleashTest do
     end
 
     test "should emit reason for non existent feature" do
-      Application.put_env(:unleash, Unleash, [])
+      Application.put_env(:unleash_fresha, Unleash, [])
 
       attach_telemetry_event([:unleash, :feature, :enabled?, :stop])
 
@@ -67,10 +67,10 @@ defmodule UnleashTest do
   describe "enabled?/3" do
     setup do
       stop_supervised(Unleash.Repo)
-      Application.put_env(:unleash, Unleash, disable_client: true)
+      Application.put_env(:unleash_fresha, Unleash, disable_client: true)
 
       on_exit(fn ->
-        Application.put_env(:unleash, Unleash, disable_client: false)
+        Application.put_env(:unleash_fresha, Unleash, disable_client: false)
       end)
 
       :ok
@@ -115,10 +115,10 @@ defmodule UnleashTest do
   describe "get_variant/3" do
     setup do
       stop_supervised(Unleash.Repo)
-      Application.put_env(:unleash, Unleash, disable_client: true)
+      Application.put_env(:unleash_fresha, Unleash, disable_client: true)
 
       on_exit(fn ->
-        Application.put_env(:unleash, Unleash, disable_client: false)
+        Application.put_env(:unleash_fresha, Unleash, disable_client: false)
       end)
 
       :ok
@@ -137,7 +137,7 @@ defmodule UnleashTest do
       |> stub(:features, fn _ -> %Mojito.Response{} end)
       |> stub(:metrics, fn _ -> %Mojito.Response{} end)
 
-      Application.put_env(:unleash, Unleash, client: Unleash.ClientMock)
+      Application.put_env(:unleash_fresha, Unleash, client: Unleash.ClientMock)
       {:ok, pid} = Unleash.start(:normal, [])
 
       children = Supervisor.which_children(pid)
@@ -151,7 +151,7 @@ defmodule UnleashTest do
       |> expect(:register_client, fn -> %Mojito.Response{} end)
       |> stub(:features, fn _ -> %Mojito.Response{} end)
 
-      Application.put_env(:unleash, Unleash, disable_metrics: true, client: Unleash.ClientMock)
+      Application.put_env(:unleash_fresha, Unleash, disable_metrics: true, client: Unleash.ClientMock)
       {:ok, pid} = Unleash.start(:normal, [])
 
       children = Supervisor.which_children(pid)
@@ -161,7 +161,7 @@ defmodule UnleashTest do
     end
 
     test "it shouldn't start anything if the client is disabled" do
-      Application.put_env(:unleash, Unleash, disable_client: true, client: Unleash.ClientMock)
+      Application.put_env(:unleash_fresha, Unleash, disable_client: true, client: Unleash.ClientMock)
       {:ok, pid} = Unleash.start(:normal, [])
 
       children = Supervisor.which_children(pid)

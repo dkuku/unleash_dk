@@ -8,7 +8,7 @@ defmodule Unleash.ClientTest do
   setup :set_mox_from_context
 
   setup do
-    default_config = Application.get_env(:unleash, Unleash, [])
+    default_config = Application.get_env(:unleash_fresha, Unleash, [])
 
     test_config =
       Keyword.merge(default_config,
@@ -17,9 +17,9 @@ defmodule Unleash.ClientTest do
         instance_id: "node@a"
       )
 
-    Application.put_env(:unleash, Unleash, test_config)
+    Application.put_env(:unleash_fresha, Unleash, test_config)
 
-    on_exit(fn -> Application.put_env(:unleash, Unleash, default_config) end)
+    on_exit(fn -> Application.put_env(:unleash_fresha, Unleash, default_config) end)
 
     :ok
   end

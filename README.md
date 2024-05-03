@@ -1,5 +1,7 @@
 # Unleash
 
+Fork of [unleash client](https://gitlab.com/afontaine/unleash_ex/)
+
 `Unleash` is a client for the
 [Unleash Toggle Service](https://unleash.github.io/).
 
@@ -33,7 +35,7 @@ by adding `unleash_ex` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:unleash, "~> 1.9"}
+    {:unleash_fresha, "~> 1.9"}
   ]
 end
 ```
@@ -44,7 +46,7 @@ There are many configuration options available, and they are listed below with
 their defaults. These go into the relevant `config/*.exs` file.
 
 ```elixir
-config :unleash, Unleash,
+config :unleash_fresha, Unleash,
   url: "", # The URL of the Unleash server to connect to, should include up to http://base.url/api
   appname: "", # The app name, used for registration
   instance_id: "", # The instance ID, used for metrics tracking
@@ -106,7 +108,7 @@ configuration:
 1. Configure your application to use your new strategies list.
 
     ```elixir
-    config :unleash, Unleash, strategies: MyApp.Strategies
+    config :unleash_fresha, Unleash, strategies: MyApp.Strategies
     ```
 
 ## Telemetry events
@@ -206,3 +208,7 @@ disabled due to retries running out or zero retries being specified initially.
   * Metadata: `%{appname: String.t(), instance_id: String.t(), retries: integer(), etag: String.t()}`
 * `[:unleash, :repo, :features_update]` - dispatched by `Unleash.Repo` when features are updated.
   * Metadata: `%{appname: String.t(), instance_id: String.t(), retries: integer(), etag: String.t(), source: :remote | :cache | :backup_file}`
+
+## Testing
+
+Tests are using upstream [client-specification](https://github.com/Unleash/client-specification) which needs to be cloned to priv folder
