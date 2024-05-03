@@ -73,5 +73,4 @@ jobs:
         if: ${{matrix.lint}}
         env:
           MIX_ENV: dev
-          # gh secret set HEX_API_KEY --app actions --body $HEX_API_KEY
-          HEX_API_KEY: ${{ secrets.HEX_API_KEY }}
+          HEX_API_KEY: ${{ secrets.HEX_ORGANIZATION_WRITE_KEY }}
