@@ -94,6 +94,7 @@ defmodule Unleash.RepoTest do
       assert_receive {:telemetry_metadata, metadata}, 500
       assert_receive {:telemetry_measurements, measurements}, 500
 
+      assert metadata.appname == "myapp"
       attach_telemetry_event(@features_update_event)
 
       Process.send(repo_pid, {:initialize, nil, 3}, [])
@@ -101,6 +102,7 @@ defmodule Unleash.RepoTest do
       assert_receive {:telemetry_metadata, metadata}, 100
 
       assert metadata.source == :backup_file
+      assert measurements == %{}
     end
 
     test "executes telemetry when writing to the backup file", %{

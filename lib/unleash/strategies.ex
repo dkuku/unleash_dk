@@ -18,16 +18,14 @@ defmodule Unleash.Strategies do
   ```
   """
 
-  alias Unleash.Strategy.{
-    ActiveForUsersWithId,
-    ApplicationHostname,
-    Default,
-    FlexibleRollout,
-    GradualRolloutRandom,
-    GradualRolloutSessionId,
-    GradualRolloutUserId,
-    RemoteAddress
-  }
+  alias Unleash.Strategy.ActiveForUsersWithId
+  alias Unleash.Strategy.ApplicationHostname
+  alias Unleash.Strategy.Default
+  alias Unleash.Strategy.FlexibleRollout
+  alias Unleash.Strategy.GradualRolloutRandom
+  alias Unleash.Strategy.GradualRolloutSessionId
+  alias Unleash.Strategy.GradualRolloutUserId
+  alias Unleash.Strategy.RemoteAddress
 
   @doc """
   Should return a list of all the avilable strategies in the format

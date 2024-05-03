@@ -33,14 +33,11 @@ defmodule Unleash.Features do
 
   def get_feature(%__MODULE__{}, nil), do: nil
 
-  def get_feature(%__MODULE__{features: features} = state, feat)
-      when is_list(features) and is_atom(feat),
-      do: get_feature(state, Atom.to_string(feat))
+  def get_feature(%__MODULE__{features: features} = state, feat) when is_list(features) and is_atom(feat),
+    do: get_feature(state, Atom.to_string(feat))
 
-  def get_feature(%__MODULE__{features: features}, feat)
-      when is_list(features) and is_binary(feat) do
-    features
-    |> Enum.find(fn feature -> compare(feature.name, feat) end)
+  def get_feature(%__MODULE__{features: features}, feat) when is_list(features) and is_binary(feat) do
+    Enum.find(features, fn feature -> compare(feature.name, feat) end)
   end
 
   def get_all_feature_names(nil), do: []

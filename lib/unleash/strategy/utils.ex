@@ -6,6 +6,9 @@ defmodule Unleash.Strategy.Utils do
   """
 
   @normalizer 100
+  @strategy_seed 0
+
+  @variant_seed 86_028_157
 
   @doc """
   Given a comma-separated list and a member, check to see if the member is in
@@ -40,9 +43,16 @@ defmodule Unleash.Strategy.Utils do
   [`gradualRolloutUserId`](https://unleash.github.io/docs/activation_strategy#gradualrolloutuserid)
   strategy.
   """
-  def normalize(id, group_id, normalizer \\ @normalizer) do
+  def normalize(id, group_id, seed \\ @strategy_seed) do
     "#{group_id}:#{id}"
-    |> Murmur.hash_x86_32()
+    |> Murmur.hash_x86_32(seed)
+    |> Integer.mod(@normalizer)
+    |> Kernel.+(1)
+  end
+
+  def normalize_variant(id, group_id, normalizer) do
+    "#{group_id}:#{id}"
+    |> Murmur.hash_x86_32(@variant_seed)
     |> Integer.mod(normalizer)
     |> Kernel.+(1)
   end

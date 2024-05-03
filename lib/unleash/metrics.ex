@@ -79,7 +79,7 @@ defmodule Unleash.Metrics do
   defp handle_metric(%{toggles: features} = state, %Feature{name: feature}, enabled?) do
     features
     |> update_metric(feature, enabled?)
-    |> (&Map.put(state, :toggles, &1)).()
+    |> then(&Map.put(state, :toggles, &1))
   end
 
   defp handle_metric(state, _feature, _enabled?) do
@@ -87,26 +87,23 @@ defmodule Unleash.Metrics do
   end
 
   defp update_metric(features, feature, true) do
-    features
-    |> Map.update(feature, %{yes: 1, no: 0}, &Map.update!(&1, :yes, fn x -> x + 1 end))
+    Map.update(features, feature, %{yes: 1, no: 0}, &Map.update!(&1, :yes, fn x -> x + 1 end))
   end
 
   defp update_metric(features, feature, false) do
-    features
-    |> Map.update(feature, %{yes: 0, no: 1}, &Map.update!(&1, :no, fn x -> x + 1 end))
+    Map.update(features, feature, %{yes: 0, no: 1}, &Map.update!(&1, :no, fn x -> x + 1 end))
   end
 
   defp handle_variant_metric(%{toggles: features} = state, variant, %{name: name}) do
     features
     |> Map.update(variant, Map.new([{name, 1}]), &Map.update(&1, name, 1, fn x -> x + 1 end))
-    |> (&Map.put(state, :toggles, &1)).()
+    |> then(&Map.put(state, :toggles, &1))
   end
 
   defp to_bucket(state), do: %{bucket: Map.put(state, :stop, current_date())}
 
   defp current_date do
-    DateTime.utc_now()
-    |> DateTime.to_iso8601()
+    DateTime.to_iso8601(DateTime.utc_now())
   end
 
   defp init_state do

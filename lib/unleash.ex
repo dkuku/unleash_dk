@@ -39,15 +39,13 @@ defmodule Unleash do
   Aliased to `enabled?/2`
   """
   @spec is_enabled?(atom() | String.t(), boolean) :: boolean
-  def is_enabled?(feature, default) when is_boolean(default),
-    do: enabled?(feature, default)
+  def is_enabled?(feature, default) when is_boolean(default), do: enabled?(feature, default)
 
   @doc """
   Aliased to `enabled?/3`
   """
   @spec is_enabled?(atom() | String.t(), map(), boolean) :: boolean
-  def is_enabled?(feature, context \\ %{}, default \\ false),
-    do: enabled?(feature, context, default)
+  def is_enabled?(feature, context \\ %{}, default \\ false), do: enabled?(feature, context, default)
 
   @doc """
   Checks if the given feature is enabled. Checks as though an empty context was
@@ -62,8 +60,7 @@ defmodule Unleash do
       true
   """
   @spec enabled?(atom() | String.t(), boolean) :: boolean
-  def enabled?(feature, default) when is_boolean(default),
-    do: enabled?(feature, %{}, default)
+  def enabled?(feature, default) when is_boolean(default), do: enabled?(feature, %{}, default)
 
   @doc """
   Checks if the given feature is enabled.
@@ -90,40 +87,7 @@ defmodule Unleash do
     :telemetry.span(
       [:unleash, :feature, :enabled?],
       start_metadata,
-      fn ->
-        {result, metadata} =
-          if Config.disable_client() do
-            {default, %{reason: :disabled_client}}
-          else
-            feature
-            |> Repo.get_feature()
-            |> case do
-              nil ->
-                {default, %{reason: :feature_not_found}}
-
-              feature ->
-                {result, strategy_evaluations} =
-                  Feature.enabled?(feature, Map.put(context, :feature_toggle, feature.name))
-
-                Metrics.add_metric({feature, result})
-
-                metadata = %{
-                  reason: :strategy_evaluations,
-                  strategy_evaluations: strategy_evaluations,
-                  feature_enabled: feature.enabled
-                }
-
-                {result, metadata}
-            end
-          end
-
-        telemetry_metadata =
-          start_metadata
-          |> Map.merge(metadata)
-          |> Map.put(:result, result)
-
-        {result, telemetry_metadata}
-      end
+      fn -> do_enabled(feature, start_metadata, context, default) end
     )
   end
 
@@ -153,24 +117,7 @@ defmodule Unleash do
     :telemetry.span(
       [:unleash, :variant, :get],
       start_metadata,
-      fn ->
-        {result, metadata} =
-          if Config.disable_client() do
-            {fallback, %{reason: :disabled_client}}
-          else
-            name
-            |> Repo.get_feature()
-            |> case do
-              nil ->
-                {fallback, %{reason: :feature_not_found}}
-
-              feature ->
-                Variant.select_variant(feature, context)
-            end
-          end
-
-        {result, Map.merge(start_metadata, metadata)}
-      end
+      fn -> do_get_variant(name, start_metadata, context, fallback) end
     )
   end
 
@@ -189,5 +136,46 @@ defmodule Unleash do
     end
 
     Supervisor.start_link(children, strategy: :one_for_one)
+  end
+
+  defp do_get_variant(name, start_metadata, context, fallback) do
+    {result, metadata} =
+      with {_, false} <- {:disable, Config.disable_client()},
+           {_, feature} when not is_nil(feature) <- {:feature, Repo.get_feature(name)} do
+        {result, metadata} = Variant.select_variant(feature, context)
+        metadata = Map.merge(start_metadata, metadata)
+        {result, metadata}
+      else
+        {:disable, _} -> {fallback, %{reason: :disabled_client}}
+        {:feature, nil} -> {fallback, %{reason: :feature_not_found}}
+      end
+
+    {result, start_metadata |> Map.put(:result, result) |> Map.merge(metadata)}
+  end
+
+  defp do_enabled(name, start_metadata, context, fallback) do
+    {result, metadata} =
+      with {_, false} <- {:disable, Config.disable_client()},
+           {_, feature} when not is_nil(feature) <- {:feature, Repo.get_feature(name)} do
+        context = Map.put(context, :feature_toggle, feature.name)
+
+        {result, strategy_evaluations} =
+          Feature.enabled?(feature, context)
+
+        Metrics.add_metric({feature, result})
+
+        metadata = %{
+          reason: :strategy_evaluations,
+          strategy_evaluations: strategy_evaluations,
+          feature_enabled: feature.enabled
+        }
+
+        {result, metadata}
+      else
+        {:disable, _} -> {fallback, %{reason: :disabled_client}}
+        {:feature, nil} -> {fallback, %{reason: :feature_not_found}}
+      end
+
+    {result, start_metadata |> Map.put(:result, result) |> Map.merge(metadata)}
   end
 end

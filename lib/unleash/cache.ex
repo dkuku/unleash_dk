@@ -52,8 +52,7 @@ defmodule Unleash.Cache do
     end
   end
 
-  def get_feature(name, table_name) when is_atom(name),
-    do: get_feature(Atom.to_string(name), table_name)
+  def get_feature(name, table_name) when is_atom(name), do: get_feature(Atom.to_string(name), table_name)
 
   @doc """
   Will upsert (create or update) the given features in the cache

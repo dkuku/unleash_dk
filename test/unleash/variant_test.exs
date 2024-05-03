@@ -162,82 +162,39 @@ defmodule Unleash.VariantTest do
           "name" => "override_test",
           "description" => "override testing",
           "enabled" => true,
-          "strategies" => [
-            %{
-              "name" => "default",
-              "parameters" => %{}
-            }
-          ],
+          "strategies" => [%{"name" => "default", "parameters" => %{}}],
           "variants" => [
             %{
               "name" => "variant1",
               "weight" => 50,
               "payload" => %{"type" => "string", "value" => "val1"},
-              "overrides" => [
-                %{
-                  "contextName" => "userId",
-                  "values" => ["420"]
-                }
-              ]
+              "overrides" => [%{"contextName" => "userId", "values" => ["420"]}]
             },
-            %{
-              "name" => "variant2",
-              "weight" => 50,
-              "payload" => %{"type" => "string", "value" => "val1"}
-            }
+            %{"name" => "variant2", "weight" => 50, "payload" => %{"type" => "string", "value" => "val1"}}
           ]
         },
         %{
           "name" => "weight_test",
           "description" => "weight selection testing fixture",
           "enabled" => true,
-          "strategies" => [
-            %{
-              "name" => "default",
-              "parameters" => %{}
-            }
-          ],
+          "strategies" => [%{"name" => "default", "parameters" => %{}}],
           "variants" => [
-            %{
-              "name" => "variant1",
-              "weight" => 99,
-              "payload" => %{"type" => "string", "value" => "val1"}
-            },
-            %{
-              "name" => "variant2",
-              "weight" => 1,
-              "payload" => %{"type" => "string", "value" => "val1"}
-            }
+            %{"name" => "variant1", "weight" => 99, "payload" => %{"type" => "string", "value" => "val1"}},
+            %{"name" => "variant2", "weight" => 1, "payload" => %{"type" => "string", "value" => "val1"}}
           ]
         },
         %{
           "name" => "disabled_variant",
           "description" => "variant with enabled set to false",
           "enabled" => false,
-          "strategies" => [
-            %{
-              "name" => "default",
-              "parameters" => %{}
-            }
-          ],
-          "variants" => [
-            %{
-              "name" => "variant1",
-              "weight" => 100,
-              "payload" => %{"type" => "string", "value" => "val1"}
-            }
-          ]
+          "strategies" => [%{"name" => "default", "parameters" => %{}}],
+          "variants" => [%{"name" => "variant1", "weight" => 100, "payload" => %{"type" => "string", "value" => "val1"}}]
         },
         %{
           "name" => "flag_without_variants",
           "description" => "a flag with empty variants",
           "enabled" => true,
-          "strategies" => [
-            %{
-              "name" => "default",
-              "parameters" => %{}
-            }
-          ],
+          "strategies" => [%{"name" => "default", "parameters" => %{}}],
           "variants" => []
         }
       ]

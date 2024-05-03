@@ -21,8 +21,9 @@ if Code.ensure_loaded?(Plug) do
 
     """
 
-    import Plug.Conn
     @behaviour Plug
+
+    import Plug.Conn
 
     @default_opts [
       user_id: :user_id,
@@ -105,7 +106,7 @@ if Code.ensure_loaded?(Plug) do
         {k, get_session(conn, v)}
       end)
       |> Enum.concat(remote_address: to_string(:inet.ntoa(conn.remote_ip)))
-      |> Enum.into(%{})
+      |> Map.new()
     end
   end
 end

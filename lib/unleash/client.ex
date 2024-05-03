@@ -1,12 +1,13 @@
 defmodule Unleash.Client do
   @moduledoc false
 
+  alias Unleash.Config
+  alias Unleash.Features
+
   @callback features(String.t()) :: Mojito.response()
   @callback register_client() :: Mojito.response()
   @callback metrics(map()) :: Mojito.response()
 
-  alias Unleash.Config
-  alias Unleash.Features
   @appname "UNLEASH-APPNAME"
   @instance_id "UNLEASH-INSTANCEID"
   @if_none_match "If-None-Match"
@@ -47,9 +48,7 @@ defmodule Unleash.Client do
       register(%{
         sdkVersion: @sdk_version,
         strategies: Config.strategy_names(),
-        started:
-          DateTime.utc_now()
-          |> DateTime.to_iso8601(),
+        started: DateTime.to_iso8601(DateTime.utc_now()),
         interval: Config.metrics_period()
       })
 
@@ -122,7 +121,7 @@ defmodule Unleash.Client do
       data
       |> tag_data()
       |> Jason.encode!()
-      |> (&Config.http_client().post(url, headers(), &1)).()
+      |> then(&Config.http_client().post(url, headers(), &1))
 
     case result do
       {:ok, %Mojito.Response{status_code: status_code} = response} ->
@@ -135,18 +134,12 @@ defmodule Unleash.Client do
 
   defp headers(nil), do: headers()
 
-  defp headers(etag),
-    do: headers() ++ [{@if_none_match, etag}]
+  defp headers(etag), do: headers() ++ [{@if_none_match, etag}]
 
   defp headers,
     do:
       Config.custom_headers() ++
-        [
-          {@appname, Config.appname()},
-          {@instance_id, Config.instance_id()},
-          @accept,
-          @content_type
-        ]
+        [{@appname, Config.appname()}, {@instance_id, Config.instance_id()}, @accept, @content_type]
 
   defp tag_data(data) do
     data

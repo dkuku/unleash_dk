@@ -20,9 +20,9 @@ defmodule Unleash.Strategy do
     name = opts[:name]
 
     quote line: true do
-      alias unquote(__MODULE__)
-
       @behaviour unquote(__MODULE__)
+
+      alias unquote(__MODULE__)
 
       @name unquote(name)
 
@@ -67,16 +67,17 @@ defmodule Unleash.Strategy do
   @doc false
   def enabled?(%{"name" => name} = strategy, context) do
     {_name, module} =
-      Config.strategies()
-      |> Enum.find(fn {n, _mod} -> n == name end)
+      Enum.find(Config.strategies(), fn {n, _mod} -> n == name end)
 
-    check_constraints(strategy, context) and module.check_enabled(strategy["parameters"], context)
+    {check_constraints(strategy, context), module.check_enabled(strategy["parameters"], context)}
+
+    check_constraints(strategy, context) and
+      module.check_enabled(strategy["parameters"], context)
   end
 
   def enabled?(_strat, _context), do: false
 
-  defp check_constraints(%{"constraints" => constraints}, context),
-    do: Constraint.verify_all(constraints, context)
+  defp check_constraints(%{"constraints" => constraints}, context), do: Constraint.verify_all(constraints, context)
 
   defp check_constraints(_strategy, _context), do: true
 end

@@ -8,6 +8,7 @@ defmodule Unleash.Strategy.GradualRolloutUserId do
   """
 
   use Unleash.Strategy, name: "GradualRolloutUserId"
+
   alias Unleash.Strategy.Utils
 
   def enabled?(_params, %{user_id: ""}), do: false
@@ -19,7 +20,7 @@ defmodule Unleash.Strategy.GradualRolloutUserId do
     result =
       percentage
       |> Utils.parse_int()
-      |> (&(&1 > 0 and Utils.normalize(user_id, group_id) <= &1)).()
+      |> then(&(&1 > 0 and Utils.normalize(user_id, group_id) <= &1))
 
     {result, %{group: group_id, user: user_id, percentage: percentage}}
   end

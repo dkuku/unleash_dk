@@ -110,8 +110,7 @@ defmodule Unleash.Repo do
 
     content = Jason.encode_to_iodata!(features)
 
-    Config.backup_file()
-    |> File.write!(content)
+    File.write!(Config.backup_file(), content)
 
     :telemetry.execute(
       [:unleash, :repo, :backup_file_update],

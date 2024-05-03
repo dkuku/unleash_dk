@@ -8,44 +8,34 @@ defmodule Unleash.Strategy.FlexibleRollout do
   """
 
   use Unleash.Strategy, name: "FlexibleRollout"
+
   alias Unleash.Strategy.Utils
 
   def enabled?(%{"rollout" => percentage} = params, context) when is_number(percentage) do
-    sticky_value =
-      params
-      |> Map.get("stickiness", "")
-      |> stickiness(context)
-
+    sticky_value = params |> Map.get("stickiness", "") |> stickiness(context)
     group = Map.get(params, "groupId", Map.get(params, :feature_toggle, ""))
 
-    if sticky_value do
-      {percentage > 0 and Utils.normalize(sticky_value, group) <= percentage,
-       %{
-         group: group,
-         percentage: percentage,
-         sticky_value: sticky_value,
-         stickiness: Map.get(params, "stickiness")
-       }}
-    else
-      {false,
-       %{
-         group: group,
-         percentage: percentage,
-         sticky_value: sticky_value,
-         stickiness: Map.get(params, "stickiness")
-       }}
-    end
+    {
+      sticky_value and percentage > 0 and Utils.normalize(sticky_value, group) <= percentage,
+      %{
+        group: group,
+        percentage: percentage,
+        sticky_value: sticky_value,
+        stickiness: Map.get(params, "stickiness")
+      }
+    }
   end
 
-  def enabled?(%{"rollout" => percentage} = params, context),
-    do: enabled?(%{params | "rollout" => Utils.parse_int(percentage)}, context)
+  def enabled?(%{"rollout" => percentage} = params, context) when is_binary(percentage) do
+    enabled?(%{params | "rollout" => Utils.parse_int(percentage)}, context)
+  end
 
-  defp stickiness("default", ctx), do: Map.get(ctx, :user_id, Map.get(ctx, :session_id, random()))
   defp stickiness("userId", ctx), do: ctx[:user_id]
   defp stickiness("sessionId", ctx), do: ctx[:session_id]
   defp stickiness("random", _ctx), do: random()
+  defp stickiness("default", ctx), do: Map.get(ctx, :user_id, Map.get(ctx, :session_id, random()))
   defp stickiness("", ctx), do: stickiness("default", ctx)
+  defp stickiness(custom_name, ctx), do: get_in(ctx, [:properties, String.to_atom(Recase.to_snake(custom_name))])
 
-  defp random,
-    do: Integer.to_string(round(:rand.uniform() * 100) + 1)
+  defp random, do: Integer.to_string(round(:rand.uniform() * 100) + 1)
 end
