@@ -78,6 +78,7 @@ if Code.ensure_loaded?(Plug) do
           iex> Unleash.Plug.enabled?(conn, :test, true)
           %Plug.Conn{}
       """
+      @dialyzer {:no_return, put_feature: 2, put_feature: 3}
       @spec put_feature(Plug.Conn.t(), String.t() | atom(), boolean()) :: Plug.Conn.t()
       def put_feature(conn, feature, default \\ false) do
         conn

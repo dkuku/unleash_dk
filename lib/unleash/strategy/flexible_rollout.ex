@@ -16,7 +16,7 @@ defmodule Unleash.Strategy.FlexibleRollout do
     group = Map.get(params, "groupId", Map.get(params, :feature_toggle, ""))
 
     {
-      !!sticky_value and percentage > 0 and Utils.normalize(sticky_value, group) <= percentage,
+      Enum.all?([!!sticky_value, percentage > 0, Utils.normalize(sticky_value, group) <= percentage]),
       %{
         group: group,
         percentage: percentage,
@@ -30,8 +30,8 @@ defmodule Unleash.Strategy.FlexibleRollout do
     enabled?(%{params | "rollout" => Utils.parse_int(percentage)}, context)
   end
 
-  defp stickiness("userId", ctx), do: ctx[:user_id]
-  defp stickiness("sessionId", ctx), do: ctx[:session_id]
+  defp stickiness("userId", ctx), do: Map.get(ctx, :user_id)
+  defp stickiness("sessionId", ctx), do: Map.get(ctx, :session_id)
   defp stickiness("random", _ctx), do: random()
   defp stickiness("default", ctx), do: Map.get(ctx, :user_id, Map.get(ctx, :session_id, random()))
   defp stickiness("", ctx), do: stickiness("default", ctx)
