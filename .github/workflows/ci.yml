@@ -1,0 +1,93 @@
+# base configuration pulled from:
+# https://github.com/dashbitco/broadway/blob/master/.github/workflows/ci.yml
+
+name: Build & Publish
+
+on:
+  pull_request:
+  push:
+    branches:
+      - "*"
+
+# by default, permissions are read-only, read + write is required for git pushes
+permissions:
+  contents: write
+
+env:
+  MIX_ENV: test
+
+jobs:
+  test:
+    runs-on: "ubuntu-latest"
+
+    name: Test Elixir ${{ matrix.elixir }}, OTP ${{ matrix.otp }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["ubuntu-latest"]
+        elixir: ["1.15", "1.16"]
+        otp: ["26", "25"]
+        include:
+          - elixir: "1.16"
+            otp: "26"
+            coverage: coverage
+            lint: lint
+    steps:
+      - uses: actions/checkout@v4
+      - uses: erlef/setup-beam@v1
+        with:
+          otp-version: ${{matrix.otp}}
+          elixir-version: ${{matrix.elixir}}
+
+      - name: Restore Dependency Cache
+        uses: actions/cache@v3
+        id: cache-deps
+        with:
+          path: |
+            deps
+            _build
+          key: |
+            mix-${{ runner.os }}-${{matrix.elixir}}-${{matrix.otp}}-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            mix-${{ runner.os }}-${{matrix.elixir}}-${{matrix.otp}}-
+
+      - run: mix deps.get
+        if: steps.cache-deps.outputs.cache-hit != 'true'
+      - run: mix deps.compile --warnings-as-errors
+        if: steps.cache-deps.outputs.cache-hit != 'true'
+
+      - name: Check for unused deps
+        run: mix deps.unlock --check-unused
+        if: ${{matrix.lint}}
+
+      - run: mix format --check-formatted
+        if: ${{matrix.lint}}
+
+      - name: Check for abandonded packaged
+        run: mix hex.audit
+        if: ${{matrix.lint}}
+
+      - run: mix test
+
+      - run: mix coveralls.github
+        if: ${{matrix.lint}}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & Publish
+        run: |
+          mix hex.build
+          mix hex.publish --yes
+        if: ${{matrix.lint && steps.changelog.outputs.skipped == 'false'}}
+        env:
+          MIX_ENV: dev
+          # gh secret set HEX_API_KEY --app actions --body $HEX_API_KEY
+          HEX_API_KEY: ${{ secrets.HEX_API_KEY }}
+
+      - name: Github Release
+        if: ${{ matrix.lint && steps.changelog.outputs.skipped == 'false' }}
+        uses: softprops/action-gh-release@v1
+        with:
+          # output options: https://github.com/TriPSs/conventional-changelog-action#outputs
+          body: ${{ steps.changelog.outputs.clean_changelog }}
+          tag_name: ${{ steps.changelog.outputs.tag }}
