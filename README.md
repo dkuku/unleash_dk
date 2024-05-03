@@ -40,6 +40,11 @@ def deps do
 end
 ```
 
+## Migrating from unleash
+
+- change the package name in mix.exs
+- rename `:uneash` to `:unleash_fresha` in config files
+
 ## Configuration
 
 There are many configuration options available, and they are listed below with
