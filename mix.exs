@@ -2,40 +2,30 @@ defmodule Unleash.MixProject do
   @moduledoc false
   use Mix.Project
 
-  @gitlab_url "https://www.gitlab.com/afontaine/unleash_ex"
+  @original_gitlab_url "https://www.gitlab.com/afontaine/unleash_ex"
+  @github_url "https://www.github.com/surgeventures/unleash_fresha"
 
   def project do
     [
-      app: :unleash,
+      app: :unleash_fresha,
       version: "VERSION" |> File.read!() |> String.trim(),
-      elixir: "~> 1.8",
+      elixir: "~> 1.14",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       aliases: aliases(),
       name: "Unleash",
-      description: "An Unleash Feature Flag client for Elixir",
-      source_url: @gitlab_url,
-      homepage_url: @gitlab_url,
+      description: "An Unleash Feature Flag client for Elixir, forked from [unleash](#{@original_gitlab_url})",
+      source_url: @github_url,
+      homepage_url: @github_url,
       docs: docs(),
-      package: [
-        files: ~w(mix.exs lib LICENSE README.md CHANGELOG.md VERSION),
-        maintainers: ["Andrew Fontaine"],
-        licenses: ["MIT"],
-        links: %{
-          "GitLab" => @gitlab_url
-        }
-      ],
+      package: package(),
       test_coverage: [tool: ExCoveralls],
       preferred_cli_env: [
         coveralls: :test,
         "coveralls.detail": :test,
         "coveralls.post": :test,
         "coveralls.html": :test
-      ],
-      dialyzer: [
-        plt_add_deps: :project,
-        plt_add_apps: [:mix]
       ]
     ]
   end
@@ -74,6 +64,17 @@ defmodule Unleash.MixProject do
   defp aliases do
     [
       test: ["test --no-start"]
+    ]
+  end
+
+  defp package do
+    [
+      files: ~w(mix.exs lib LICENSE README.md CHANGELOG.md VERSION),
+      licenses: ["MIT"],
+      links: %{
+        "Original project" => @original_gitlab_url,
+        "github" => @github_url
+      }
     ]
   end
 

@@ -23,7 +23,7 @@ defmodule Unleash.MetricsTest do
         |> allow(self(), metrics)
         |> stub(:metrics, fn _ -> %Mojito.Response{} end)
 
-        Application.put_env(:unleash, Unleash, client: Unleash.ClientMock)
+        Application.put_env(:unleash_fresha, Unleash, client: Unleash.ClientMock)
 
         for _ <- 1..enabled do
           Unleash.Metrics.add_metric({%Feature{name: feature}, true}, metrics)
@@ -61,7 +61,7 @@ defmodule Unleash.MetricsTest do
         |> allow(self(), metrics)
         |> stub(:metrics, fn _ -> %Mojito.Response{} end)
 
-        Application.put_env(:unleash, Unleash, client: Unleash.ClientMock)
+        Application.put_env(:unleash_fresha, Unleash, client: Unleash.ClientMock)
 
         for {v, n} <- variants do
           for _ <- 1..n do
@@ -89,7 +89,7 @@ defmodule Unleash.MetricsTest do
         %Mojito.Response{}
       end)
 
-      Application.put_env(:unleash, Unleash, client: Unleash.ClientMock)
+      Application.put_env(:unleash_fresha, Unleash, client: Unleash.ClientMock)
 
       assert :ok = GenServer.call(metrics, :send_metrics)
     end
@@ -106,7 +106,7 @@ defmodule Unleash.MetricsTest do
           %Mojito.Response{}
         end)
 
-        Application.put_env(:unleash, Unleash, client: Unleash.ClientMock)
+        Application.put_env(:unleash_fresha, Unleash, client: Unleash.ClientMock)
 
         for _ <- 1..enabled do
           Unleash.Metrics.add_metric({%Feature{name: feature}, true}, metrics)

@@ -39,12 +39,14 @@ defmodule Unleash do
   Aliased to `enabled?/2`
   """
   @spec is_enabled?(atom() | String.t(), boolean) :: boolean
+  # credo:disable-for-next-line
   def is_enabled?(feature, default) when is_boolean(default), do: enabled?(feature, default)
 
   @doc """
   Aliased to `enabled?/3`
   """
   @spec is_enabled?(atom() | String.t(), map(), boolean) :: boolean
+  # credo:disable-for-next-line
   def is_enabled?(feature, context \\ %{}, default \\ false), do: enabled?(feature, context, default)
 
   @doc """

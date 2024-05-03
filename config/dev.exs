@@ -1,6 +1,6 @@
 import Config
 
-config :unleash, Unleash,
+config :unleash_fresha, Unleash,
   url: "http://localhost:4242/api",
   appname: "dev",
   instance_id: "dev",

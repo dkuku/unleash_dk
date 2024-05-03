@@ -9,9 +9,13 @@ defmodule Unleash.ClientSpecificationTest do
          |> Jason.decode!()
   @specs
   |> List.wrap()
-  |> Enum.reject(fn path -> path =~ "15" end)
-  |> Enum.reject(fn path -> path =~ "16" end)
-  |> Enum.reject(fn path -> path =~ "17" end)
+  |> Enum.reject(fn path ->
+    Enum.any?([
+      path =~ "15-global-constraints",
+      path =~ "16-strategy-variants",
+      path =~ "17-dependent-features"
+    ])
+  end)
   |> Enum.each(fn spec ->
     test_spec =
       "#{@specification_path}/#{spec}"
