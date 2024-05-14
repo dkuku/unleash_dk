@@ -25,3 +25,7 @@ unleash-*.tar
 .elixir_ls/
 .direnv/
 /RELEASE.md
+
+# Intellij
+.idea/
+*.iml
