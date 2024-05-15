@@ -21,7 +21,7 @@ defmodule Unleash.MetricsTest do
                 feature <- string(:alphanumeric, min_length: 1) do
         Unleash.ClientMock
         |> allow(self(), metrics)
-        |> stub(:metrics, fn _ -> %Mojito.Response{} end)
+        |> stub(:metrics, fn _ -> %Req.Response{} end)
 
         Application.put_env(:unleash_fresha, Unleash, client: Unleash.ClientMock)
 
@@ -59,7 +59,7 @@ defmodule Unleash.MetricsTest do
                 variants = Enum.zip(v, n) do
         Unleash.ClientMock
         |> allow(self(), metrics)
-        |> stub(:metrics, fn _ -> %Mojito.Response{} end)
+        |> stub(:metrics, fn _ -> %Req.Response{} end)
 
         Application.put_env(:unleash_fresha, Unleash, client: Unleash.ClientMock)
 
@@ -86,7 +86,7 @@ defmodule Unleash.MetricsTest do
       |> allow(self(), metrics)
       |> expect(:metrics, fn %{bucket: %{toggles: toggles} = _bucket} ->
         assert ^toggles = %{}
-        %Mojito.Response{}
+        %Req.Response{}
       end)
 
       Application.put_env(:unleash_fresha, Unleash, client: Unleash.ClientMock)
@@ -103,7 +103,7 @@ defmodule Unleash.MetricsTest do
         |> expect(:metrics, fn %{bucket: %{toggles: toggles} = _bucket} ->
           f = Map.get(toggles, feature)
           assert ^f = %{yes: enabled, no: disabled}
-          %Mojito.Response{}
+          %Req.Response{}
         end)
 
         Application.put_env(:unleash_fresha, Unleash, client: Unleash.ClientMock)

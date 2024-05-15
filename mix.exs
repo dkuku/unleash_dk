@@ -53,7 +53,7 @@ defmodule Unleash.MixProject do
       {:mox, "~> 1.0", only: :test},
       {:recase, "~> 0.6"},
       {:murmur, "~> 1.0"},
-      {:mojito_fresha, "~> 0.7"},
+      {:req, "~> 0.4"},
       {:jason, "~> 1.1"},
       {:telemetry, "~> 1.1"},
       {:plug, "~> 1.8", optional: true},
