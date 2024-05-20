@@ -152,67 +152,36 @@ for example:
 
 The following events are emitted by the Unleash library:
 
-* `[:unleash, :feature, :enabled?, :start]` - dispatched by `Unleash` whenever
-a feature state has been requested.
-  * Measurement:  `%{system_time: system_time, monotonic_time: monotonic_time}`
-  * Metadata: `%{appname: String.t(), instance_id: String.t(), feature: String.t()}`
-* `[:unleash, :feature, :enabled?, :stop]` - dispatched by `Unleash` whenever
-a feature check has successfully returned a result.
-  * Measurement:  `%{duration: native_time, monotonic_time: monotonic_time}`
-  * Metadata: `%{appname: String.t(), instance_id: String.t(), feature: String.t(), result: boolean(), reason: atom(), strategy_evaluations: [{String.t(), boolean()}], feature_enabled: boolean()}`
-* `[:unleash, :feature, :enabled?, :exception]` - dispatched by `Unleash` after
-exceptions on fetching a feature's activation state.
-  * Measurement:  `%{duration: native_time, monotonic_time: monotonic_time}`
-  * Metadata: `%{appname: String.t(), instance_id: String.t(), feature: String.t(), kind: :throw | :error | :exit, reason: term(), stacktrace: Exception.stacktrace()}`
-* `[:unleash, :client, :fetch_features, :start]` - dispatched by `Unleash.Client` whenever
-it start to fetch features from a remote Unleash server.
-  * Measurement:  `%{system_time: system_time, monotonic_time: monotonic_time}`
-  * Metadata: `%{appname: String.t(), instance_id: String.t(), etag: String.t() | nil, url: String.t()}`
-* `[:unleash, :client, :fetch_features, :stop]` - dispatched by `Unleash.Client` whenever
-it finishes to fetch features from a remote Unleash server.
-  * Measurement:  `%{duration: native_time, monotonic_time: monotonic_time}`
-  * Metadata: `%{appname: String.t(), instance_id: String.t(), etag: String.t() | nil, url: String.t(), http_response_status: pos_integer | nil, error: struct() | nil}`
-* `[:unleash, :client, :fetch_features, :exception]` - dispatched by `Unleash.Client` after
-exceptions on fetching features.
-  * Measurement:  `%{duration: native_time, monotonic_time: monotonic_time}`
-  * Metadata: `%{appname: String.t(), instance_id: String.t(), etag: String.t() | nil, url: String.t(), kind: :throw | :error | :exit, reason: term(), stacktrace: Exception.stacktrace()}`
-* `[:unleash, :client, :register, :start]` - dispatched by `Unleash.Client` whenever
-it starts to register in an Unleash server.
-  * Measurement:  `%{system_time: system_time, monotonic_time: monotonic_time}`
-  * Metadata: `%{appname: String.t(), instance_id: String.t(), url: String.t(), sdk_version: String.t(), strategies: [String.t()], interval: pos_integer}`
-* `[:unleash, :client, :register, :stop]` - dispatched by `Unleash.Client` whenever
-it finishes to register in an Unleash server.
-  * Measurement:  `%{duration: native_time, monotonic_time: monotonic_time}`
-  * Metadata: `%{appname: String.t(), instance_id: String.t(), url: String.t(), sdk_version: String.t(), strategies: [String.t()], interval: pos_integer, http_response_status: pos_integer | nil, error: struct() | nil}`
-* `[:unleash, :client, :register, :exception]` - dispatched by `Unleash.Client` after
-exceptions on registering in an Unleash server.
-  * Measurement:  `%{duration: native_time, monotonic_time: monotonic_time}`
-  * Metadata: `%{appname: String.t(), instance_id: String.t(), url: String.t(), sdk_version: String.t(), strategies: [String.t()], interval: pos_integer, kind: :throw | :error | :exit, reason: term(), stacktrace: Exception.stacktrace()}`
-* `[:unleash, :client, :push_metrics, :start]` - dispatched by `Unleash.Client` whenever
-it starts to push metrics to an Unleash server.
-  * Measurement:  `%{system_time: system_time, monotonic_time: monotonic_time}`
-  * Metadata: `%{appname: String.t(), instance_id: String.t(), url: String.t(), metrics_payload: %{ :bucket => %{:start => String.t(), :stop => String.t(), toggles: %{
-    String.t() => %{ :yes => pos_integer(), :no => pos_integer() } } } }
-  }`
-* `[:unleash, :client, :push_metrics, :stop]` - dispatched by `Unleash.Client` whenever
-it finishes to push metrics to an Unleash server.
-  * Measurement:  `%{duration: native_time, monotonic_time: monotonic_time}`
-  * Metadata: `%{appname: String.t(), instance_id: String.t(), url: String.t(), http_response_status: pos_integer | nil, error: struct() | nil, metrics_payload: %{ :bucket => %{:start => String.t(), :stop => String.t(), toggles: %{
-    String.t() => %{ :yes => pos_integer(), :no => pos_integer() } } } } }`
-* `[:unleash, :client, :push_metrics, :exception]` - dispatched by `Unleash.Client` after
-exceptions on pushing metrics to an Unleash server.
-  * Measurement:  `%{duration: native_time, monotonic_time: monotonic_time}`
-  * Metadata: `%{appname: String.t(), instance_id: String.t(), url: String.t(), kind: :throw | :error | :exit, reason: term(), stacktrace: Exception.stacktrace(), metrics_payload: %{ :bucket => %{:start => String.t(), :stop => String.t(), toggles: %{
-    String.t() => %{ :yes => pos_integer(), :no => pos_integer() } } } } }`
-* `[:unleash, :repo, :schedule]` - dispatched by `Unleash.Repo` when scheduling a poll to the server for metrics
-  * Metadata: `%{appname: String.t(), instance_id: String.t(), retries: integer(), etag: String.t(), interval: pos_integer()}`
-* `[:unleash, :repo, :backup_file_update]` - dispatched by `Unleash.Repo` when it writes features to the backup file.
-  * Metadata: `%{appname: String.t(), instance_id: String.t(), content: String.t(), filename: String.t()}`
-* `[:unleash, :repo, :disable_polling]` - dispatched by `Unleash.Repo` when polling gets
-disabled due to retries running out or zero retries being specified initially.
-  * Metadata: `%{appname: String.t(), instance_id: String.t(), retries: integer(), etag: String.t()}`
-* `[:unleash, :repo, :features_update]` - dispatched by `Unleash.Repo` when features are updated.
-  * Metadata: `%{appname: String.t(), instance_id: String.t(), retries: integer(), etag: String.t(), source: :remote | :cache | :backup_file}`
+| Event | When | Measurement | Metadata |
+| --- | --- | --- | --- |
+| `[:unleash, :feature, :enabled?, :start]` | dispatched by Unleash whenever a feature state has been requested.| `%{system_time: system_time, monotonic_time: monotonic_time}` | `%{appname: String.t(), instance_id: String.t(), feature: String.t()}` |
+| `[:unleash, :feature, :enabled?, :stop]` | dispatched by Unleash whenever a feature check has successfully returned a result. | `%{duration: native_time, monotonic_time: monotonic_time}` | `%{appname: String.t(), instance_id: String.t(), feature: String.t(), result: boolean(), reason: atom(), strategy_evaluations: [{String.t(), boolean()}], feature_enabled: boolean()}` |
+| `[:unleash, :feature, :enabled?, :exception]` | dispatched by Unleash after exceptions on fetching a feature's activation state. | `%{duration: native_time, monotonic_time: monotonic_time}` | `%{appname: String.t(), instance_id: String.t(), feature: String.t(), kind: :throw \| :error \| :exit, reason: term(), stacktrace: Exception.stacktrace()}` |
+
+| Event | When | Measurement | Metadata |
+| --- | --- | --- | --- |
+| `[:unleash, :client, :fetch_features, :start]` | dispatched by Unleash.Client whenever it start to fetch features from a remote Unleash server. | `%{system_time: system_time, monotonic_time: monotonic_time}` | `%{appname: String.t(), instance_id: String.t(), etag: String.t() \| nil, url: String.t()}` |
+| `[:unleash, :client, :fetch_features, :stop]`| dispatched by Unleash.Client whenever it finishes to fetch features from a remote Unleash server.  | `%{duration: native_time, monotonic_time: monotonic_time}` | `%{appname: String.t(), instance_id: String.t(), etag: String.t() \| nil, url: String.t(), http_response_status: pos_integer \| nil, error: struct() \| nil}` |
+| `[:unleash, :client, :fetch_features, :exception]` | dispatched by Unleash.Client after exceptions on fetching features. | `%{duration: native_time, monotonic_time: monotonic_time}` | `%{appname: String.t(), instance_id: String.t(), etag: String.t() \| nil, url: String.t(), kind: :throw \| :error \| :exit, reason: term(), stacktrace: Exception.stacktrace()}` |
+
+| Event | When | Measurement | Metadata |
+| --- | --- | --- | --- |
+| `[:unleash, :client, :register, :start]` | dispatched by Unleash.Client whenever it starts to register in an Unleash server. | `%{system_time: system_time, monotonic_time: monotonic_time}` | `%{appname: String.t(), instance_id: String.t(), url: String.t(), sdk_version: String.t(), strategies: [String.t()], interval: pos_integer}` |
+| `[:unleash, :client, :register, :stop]` | dispatched by Unleash.Client whenever it finishes to register in an Unleash server. | `%{duration: native_time, monotonic_time: monotonic_time}` | `%{appname: String.t(), instance_id: String.t(), url: String.t(), sdk_version: String.t(), strategies: [String.t()], interval: pos_integer, http_response_status: pos_integer \| nil, error: struct() \| nil}` |
+| `[:unleash, :client, :register, :exception]` | dispatched by Unleash.Client after exceptions on registering in an Unleash server. | `%{duration: native_time, monotonic_time: monotonic_time}` | `%{appname: String.t(), instance_id: String.t(), url: String.t(), sdk_version: String.t(), strategies: [String.t()], interval: pos_integer, kind: :throw \| :error \| :exit, reason: term(), stacktrace: Exception.stacktrace()}` |
+
+| Event | When | Measurement | Metadata |
+| --- | --- | --- | --- |
+| `[:unleash, :client, :push_metrics, :start]` | dispatched by Unleash.Client whenever it starts to push metrics to an Unleash server. | `%{system_time: system_time, monotonic_time: monotonic_time}` | `%{appname: String.t(), instance_id: String.t(), url: String.t(), metrics_payload: %{ :bucket => %{:start => String.t(), :stop => String.t(), toggles: %{ String.t() => %{ :yes => pos_integer(), :no => pos_integer() } } } } }` |
+| `[:unleash, :client, :push_metrics, :stop]` | dispatched by Unleash.Client whenever it finishes to push metrics to an Unleash server. | `%{duration: native_time, monotonic_time: monotonic_time}` | `%{appname: String.t(), instance_id: String.t(), url: String.t(), http_response_status: pos_integer \| nil, error: struct() \| nil, metrics_payload: %{ :bucket => %{:start => String.t(), :stop => String.t(), toggles: %{ String.t() => %{ :yes => pos_integer(), :no => pos_integer() } } } } }` |
+| `[:unleash, :client, :push_metrics, :exception]` | dispatched by Unleash.Client after exceptions on pushing metrics to an Unleash server. | `%{duration: native_time, monotonic_time: monotonic_time}` | `%{appname: String.t(), instance_id: String.t(), url: String.t(), kind: :throw \| :error \| :exit, reason: term(), stacktrace: Exception.stacktrace(), metrics_payload: %{ :bucket => %{:start => String.t(), :stop => String.t(), toggles: %{ String.t() => %{ :yes => pos_integer(), :no => pos_integer() } } } } }`
+
+| Event                                     | When                           | Metadata                                                                                                         |
+| ----------------------------------------- | ------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| `[:unleash, :repo, :schedule]`            | dispatched by Unleash.Repo when scheduling a poll to the server for metrics                                                                                                                                                                 | `%{appname: String.t(), instance_id: String.t(), retries: integer(), etag: String.t(), interval: pos_integer()}` |
+| `[:unleash, :repo, :backup_file_update]`  | dispatched by Unleash.Repo when it writes features to the backup file.                                                                                                                                                                      | `%{appname: String.t(), instance_id: String.t(), content: String.t(), filename: String.t()}`                     |
+| `[:unleash, :repo, :disable_polling]`     | dispatched by Unleash.Repo when polling gets disabled due to retries running out or zero retries being specified initially.                                                                                                                 | `%{appname: String.t(), instance_id: String.t(), retries: integer(), etag: String.t()}`                          |
+| `[:unleash, :repo, :features_update]`     | dispatched by Unleash.Repo when features are updated.                                                                                                                                                                                       | `%{appname: String.t(), instance_id: String.t(), retries: integer(), etag: String.t(), source: :remote \| :cache \| :backup_file}` |
 
 ## Testing
 
