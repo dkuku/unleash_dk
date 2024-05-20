@@ -44,10 +44,13 @@ defmodule Unleash.ClientSpecificationTest do
         @feature feature
         @expected expected
 
-        test t do
-          context = entity_from_file(@context)
+        # duplicatied test descriptions
+        if t != "F2.startsWith.caseInsensitve should be enabled" do
+          test t do
+            context = entity_from_file(@context)
 
-          assert @expected == Unleash.enabled?(@feature, context)
+            assert @expected == Unleash.enabled?(@feature, context)
+          end
         end
       end)
 

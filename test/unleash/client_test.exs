@@ -8,7 +8,6 @@ defmodule Unleash.ClientTest do
 
     test_config =
       Keyword.merge(default_config,
-        http_client: MojitoMock,
         appname: "myapp",
         instance_id: "node@a"
       )

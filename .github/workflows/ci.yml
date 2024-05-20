@@ -70,7 +70,7 @@ jobs:
         run: |
           mix hex.build
           mix hex.publish --yes
-        if: ${{matrix.lint}}
+        if: ${{matrix.lint}} && github.ref == 'refs/heads/main'
         env:
           MIX_ENV: dev
           HEX_API_KEY: ${{ secrets.HEX_ORGANIZATION_WRITE_KEY }}
