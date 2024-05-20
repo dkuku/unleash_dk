@@ -1,13 +1,13 @@
 # base configuration pulled from:
 # https://github.com/dashbitco/broadway/blob/master/.github/workflows/ci.yml
 
-name: Build & Test
+name: Build & Publish
 
 on:
   pull_request:
   push:
     branches:
-      - "*"
+      - "main"
 
 # by default, permissions are read-only, read + write is required for git pushes
 permissions:
@@ -25,12 +25,8 @@ jobs:
       fail-fast: false
       matrix:
         os: ["ubuntu-latest"]
-        elixir: ["1.15", "1.16"]
-        otp: ["26", "25"]
-        include:
-          - elixir: "1.16"
-            otp: "25"
-            lint: lint
+        elixir: ["1.16"]
+        otp: ["26"]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -57,11 +53,12 @@ jobs:
       - run: mix deps.compile --warnings-as-errors
         if: steps.cache-deps.outputs.cache-hit != 'true'
 
-      - name: Check for unused deps
-        run: mix deps.unlock --check-unused
-        if: ${{matrix.lint}}
-
-      - run: mix format --check-formatted
-        if: ${{matrix.lint}}
-
       - run: mix test
+
+      - name: Build & Publish
+        run: |
+          mix hex.build
+          mix hex.publish --yes
+        env:
+          MIX_ENV: dev
+          HEX_API_KEY: ${{ secrets.HEX_ORGANIZATION_WRITE_KEY }}
