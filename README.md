@@ -67,7 +67,7 @@ config :unleash_fresha, Unleash,
 ```
 
 `:custom_http_headers` should follow the format prescribed by
-`t:Mojito.headers/0`
+`t:Req.headers/0`
 
 `:strategies` should be a module that implements
 `c:Unleash.Strategies.strategies/0`. See [Extensibility](#extensibility)

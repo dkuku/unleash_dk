@@ -14,7 +14,7 @@ defmodule Unleash.Config do
     disable_metrics: false,
     retries: -1,
     client: Unleash.Client,
-    http_client: Mojito,
+    http_client: Req,
     app_env: :test
   ]
 

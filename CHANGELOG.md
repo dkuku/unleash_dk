@@ -1,6 +1,12 @@
 # Changelog
 
 <!-- %% CHANGELOG_ENTRIES %% -->
+## 1.10.0 - 2024-05-20
+* replace Mojito with Req
+
+## 1.9.2 - 2023-01-25
+* Update dependencies
+* Add version, date, number comparison
 
 ## 1.9.0 - 2023-01-25
 

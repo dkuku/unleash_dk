@@ -1,18 +1,13 @@
 defmodule Unleash.ClientTest do
   use ExUnit.Case
 
-  import Mox
-
   alias Unleash.Client
-
-  setup :set_mox_from_context
 
   setup do
     default_config = Application.get_env(:unleash_fresha, Unleash, [])
 
     test_config =
       Keyword.merge(default_config,
-        http_client: MojitoMock,
         appname: "myapp",
         instance_id: "node@a"
       )
@@ -26,14 +21,15 @@ defmodule Unleash.ClientTest do
 
   describe "features/1" do
     test "publishes start event" do
-      expect(MojitoMock, :get, fn _url, _headers ->
-        {:ok, %Mojito.Response{body: ~S({"version": "1", "features":[]}), headers: [{"etag", "x"}], status_code: 200}}
-      end)
-
       attach_telemetry_event([:unleash, :client, :fetch_features, :start])
 
-      assert {"x", %Unleash.Features{}} = Client.features()
+      Req.Test.stub(Unleash.Client, fn conn ->
+        conn
+        |> Map.update!(:resp_headers, fn headers -> [{"etag", "x"}] ++ headers end)
+        |> Req.Test.json(%{"version" => "1", "features" => []})
+      end)
 
+      assert {"x", %Unleash.Features{}} = Client.features()
       assert_received {:telemetry_metadata, metadata}
       assert_received {:telemetry_measurements, measurements}
 
@@ -47,8 +43,10 @@ defmodule Unleash.ClientTest do
     end
 
     test "publishes stop event" do
-      expect(MojitoMock, :get, fn _url, _headers ->
-        {:ok, %Mojito.Response{body: ~S({"version": "1", "features":[]}), headers: [{"etag", "x"}], status_code: 200}}
+      Req.Test.stub(Unleash.Client, fn conn ->
+        conn
+        |> Map.update!(:resp_headers, fn headers -> [{"etag", "x"}] ++ headers end)
+        |> Req.Test.json(%{"version" => "1", "features" => []})
       end)
 
       attach_telemetry_event([:unleash, :client, :fetch_features, :stop])
@@ -69,18 +67,26 @@ defmodule Unleash.ClientTest do
     end
 
     test "publishes stop event with an error" do
-      expect(MojitoMock, :get, fn _url, _headers -> {:error, %Mojito.Error{message: "Network unavailable"}} end)
+      Req.Test.stub(Unleash.Client, fn conn ->
+        # TODO change to transport error after req 0.5 is released
+        # Req.Test.transport_error(conn, :econnrefused)
+
+        exception = Mint.TransportError.message(%Mint.TransportError{reason: :timeout})
+        put_in(conn.private[:req_test_exception], exception)
+      end)
+
       attach_telemetry_event([:unleash, :client, :fetch_features, :stop])
 
-      assert {nil, %Mojito.Error{}} = Client.features()
-
+      assert {nil, :connection_error} = Client.features()
       assert_received {:telemetry_metadata, metadata}
-
-      assert %Mojito.Error{} = metadata[:error]
+      assert :connection_error == metadata[:error]
     end
 
     test "publishes exception event" do
-      expect(MojitoMock, :get, fn _url, _headers -> raise "Unexpected error" end)
+      Req.Test.stub(Unleash.Client, fn _conn ->
+        raise "Unexpected error"
+      end)
+
       attach_telemetry_event([:unleash, :client, :fetch_features, :exception])
 
       assert_raise RuntimeError, fn -> Client.features() end
@@ -104,10 +110,13 @@ defmodule Unleash.ClientTest do
 
   describe "register_client/0" do
     test "publishes start event" do
-      expect(MojitoMock, :post, fn _url, _body, _headers -> {:ok, %Mojito.Response{status_code: 200}} end)
+      Req.Test.stub(Unleash.Client, fn conn ->
+        Req.Test.json(conn, %{})
+      end)
+
       attach_telemetry_event([:unleash, :client, :register, :start])
 
-      assert {:ok, %Mojito.Response{}} = Client.register_client()
+      assert {:ok, %Req.Response{}} = Client.register_client()
 
       assert_received {:telemetry_metadata, metadata}
       assert_received {:telemetry_measurements, measurements}
@@ -126,10 +135,13 @@ defmodule Unleash.ClientTest do
     end
 
     test "publishes stop event with measurements" do
-      expect(MojitoMock, :post, fn _url, _body, _headers -> {:ok, %Mojito.Response{status_code: 200}} end)
+      Req.Test.stub(Unleash.Client, fn conn ->
+        Req.Test.json(conn, %{})
+      end)
+
       attach_telemetry_event([:unleash, :client, :register, :stop])
 
-      assert {:ok, %Mojito.Response{}} = Client.register_client()
+      assert {:ok, %Req.Response{}} = Client.register_client()
 
       assert_received {:telemetry_metadata, metadata}
       assert_received {:telemetry_measurements, measurements}
@@ -149,18 +161,28 @@ defmodule Unleash.ClientTest do
     end
 
     test "publishes stop with an error event" do
-      expect(MojitoMock, :post, fn _url, _body, _headers -> {:error, %Mojito.Error{message: "Network unavailable"}} end)
+      Req.Test.stub(Unleash.Client, fn conn ->
+        # TODO change to transport error after req 0.5 is released
+        # Req.Test.transport_error(conn, :econnrefused)
+
+        exception = Mint.TransportError.message(%Mint.TransportError{reason: :timeout})
+        put_in(conn.private[:req_test_exception], exception)
+      end)
+
       attach_telemetry_event([:unleash, :client, :register, :stop])
 
-      assert {:error, %Mojito.Error{}} = Client.register_client()
+      assert {:error, :connection_error} = Client.register_client()
 
       assert_received {:telemetry_metadata, metadata}
 
-      assert %Mojito.Error{} = metadata[:error]
+      assert :connection_error = metadata[:error]
     end
 
     test "publishes exception event with measurements" do
-      expect(MojitoMock, :post, fn _url, _body, _headers -> raise "Unexpected error" end)
+      Req.Test.stub(Unleash.Client, fn _conn ->
+        raise "Unexpected error"
+      end)
+
       attach_telemetry_event([:unleash, :client, :register, :exception])
 
       assert_raise RuntimeError, fn -> Client.register_client() end
@@ -188,7 +210,10 @@ defmodule Unleash.ClientTest do
 
   describe "metrics/1" do
     test "publishes start event" do
-      expect(MojitoMock, :post, fn _url, _body, _headers -> {:ok, %Mojito.Response{status_code: 200}} end)
+      Req.Test.stub(Unleash.Client, fn conn ->
+        Req.Test.json(conn, %{})
+      end)
+
       attach_telemetry_event([:unleash, :client, :push_metrics, :start])
 
       payload = %{
@@ -202,7 +227,7 @@ defmodule Unleash.ClientTest do
         }
       }
 
-      assert {:ok, %Mojito.Response{}} = Client.metrics(payload)
+      assert {:ok, %Req.Response{}} = Client.metrics(payload)
 
       assert_received {:telemetry_metadata, metadata}
       assert_received {:telemetry_measurements, measurements}
@@ -218,10 +243,13 @@ defmodule Unleash.ClientTest do
     end
 
     test "publishes stop event with measurements" do
-      expect(MojitoMock, :post, fn _url, _body, _headers -> {:ok, %Mojito.Response{status_code: 200}} end)
+      Req.Test.stub(Unleash.Client, fn conn ->
+        Req.Test.json(conn, %{})
+      end)
+
       attach_telemetry_event([:unleash, :client, :push_metrics, :stop])
 
-      assert {:ok, %Mojito.Response{}} = Client.metrics(%{})
+      assert {:ok, %Req.Response{}} = Client.metrics(%{})
 
       assert_received {:telemetry_metadata, metadata}
       assert_received {:telemetry_measurements, measurements}
@@ -237,18 +265,28 @@ defmodule Unleash.ClientTest do
     end
 
     test "publishes stop with an error event" do
-      expect(MojitoMock, :post, fn _url, _body, _headers -> {:error, %Mojito.Error{message: "Network unavailable"}} end)
-      attach_telemetry_event([:unleash, :client, :push_metrics, :stop])
+      Req.Test.stub(Unleash.Client, fn conn ->
+        # TODO change to transport error after req 0.5 is released
+        # Req.Test.transport_error(conn, :econnrefused)
 
-      assert {:error, %Mojito.Error{}} = Client.metrics(%{})
+        exception = Mint.TransportError.message(%Mint.TransportError{reason: :timeout})
+        put_in(conn.private[:req_test_exception], exception)
+      end)
 
+      attach_telemetry_event([:unleash, :client, :register, :stop])
+
+      assert {:error, :connection_error} = Client.register_client()
       assert_received {:telemetry_metadata, metadata}
 
-      assert %Mojito.Error{} = metadata[:error]
+      assert :connection_error = metadata[:error]
     end
 
     test "publishes exception event with measurements" do
-      expect(MojitoMock, :post, fn _url, _body, _headers -> raise "Unexpected error" end)
+      Req.Test.stub(Unleash.Client, fn conn ->
+        raise "Unexpected error"
+        Req.Test.json(conn, %{})
+      end)
+
       attach_telemetry_event([:unleash, :client, :push_metrics, :exception])
 
       assert_raise RuntimeError, fn -> Client.metrics(%{}) end

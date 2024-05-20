@@ -4,10 +4,11 @@ defmodule Unleash.Client do
   alias Unleash.Config
   alias Unleash.Features
 
-  @callback features(String.t()) :: Mojito.response()
-  @callback register_client() :: Mojito.response()
-  @callback metrics(map()) :: Mojito.response()
+  @callback features(String.t()) :: Req.Response.t()
+  @callback register_client() :: Req.Response.t()
+  @callback metrics(map()) :: Req.Response.t()
 
+  @unleash_config Application.compile_env(:unleash_fresha, :unleash_req_options, [])
   @appname "UNLEASH-APPNAME"
   @instance_id "UNLEASH-INSTANCEID"
   @if_none_match "If-None-Match"
@@ -25,22 +26,23 @@ defmodule Unleash.Client do
 
     start_metadata = telemetry_metadata(%{etag: etag, url: url})
 
-    :telemetry.span(
-      @telemetry_features_prefix,
-      start_metadata,
-      fn ->
-        result = Config.http_client().get(url, headers)
+    :telemetry.span(@telemetry_features_prefix, start_metadata, fn ->
+      [base_url: url, headers: headers]
+      |> Keyword.merge(@unleash_config)
+      |> Req.request()
+      |> case do
+        {:ok, %{body: nil}} ->
+          error = :connection_error
+          {{nil, error}, Map.put(start_metadata, :error, error)}
 
-        case result do
-          {:ok, response} ->
-            {result, metadata} = handle_feature_response(response)
-            {result, Map.merge(start_metadata, metadata)}
+        {:ok, response} ->
+          {result, metadata} = handle_feature_response(response)
+          {result, Map.merge(start_metadata, metadata)}
 
-          {:error, error} ->
-            {{nil, error}, Map.put(start_metadata, :error, error)}
-        end
+        {:error, error} ->
+          {{nil, error}, Map.put(start_metadata, :error, error)}
       end
-    )
+    end)
   end
 
   def register_client,
@@ -87,47 +89,48 @@ defmodule Unleash.Client do
     end)
   end
 
-  defp handle_feature_response(mojito) do
-    case mojito do
-      %Mojito.Response{status_code: 304} ->
+  defp handle_feature_response(response) do
+    case response do
+      %Req.Response{status: 304} ->
         {:cached, %{http_response_status: 304}}
 
-      %Mojito.Response{status_code: 200} ->
-        pull_out_data(mojito)
+      %Req.Response{status: 200} ->
+        pull_out_data(response)
 
-      %Mojito.Response{status_code: status} ->
+      %Req.Response{status: status} when is_integer(status) ->
         {:cached, %{http_response_status: status}}
     end
   end
 
-  defp pull_out_data(mojito) do
+  defp pull_out_data(response) do
     features =
-      mojito
-      |> Map.get(:body, "")
-      |> Jason.decode!()
-      |> Features.from_map!()
+      Features.from_map!(response.body)
 
     etag =
-      mojito
-      |> Map.get(:headers, [])
-      |> Map.new()
-      |> Map.get("etag", nil)
+      response
+      |> Req.Response.get_header("etag")
+      |> Enum.at(0)
 
-    {{etag, features}, %{http_response_status: 200, etag: etag}}
+    metadata = %{http_response_status: 200, etag: etag}
+
+    {{etag, features}, metadata}
   end
 
   defp send_data(url, data) do
-    result =
-      data
-      |> tag_data()
-      |> Jason.encode!()
-      |> then(&Config.http_client().post(url, headers(), &1))
+    [
+      url: url,
+      method: :post,
+      headers: headers(),
+      json: tag_data(data)
+    ]
+    |> Keyword.merge(@unleash_config)
+    |> Req.request()
+    |> case do
+      {:ok, %Req.Response{status: status} = response} when is_integer(status) ->
+        {{:ok, response}, %{http_response_status: status}}
 
-    case result do
-      {:ok, %Mojito.Response{status_code: status_code} = response} ->
-        {{:ok, response}, %{http_response_status: status_code}}
-
-      {:error, e} ->
+      {:ok, %Req.Response{}} ->
+        e = :connection_error
         {{:error, e}, %{error: e}}
     end
   end

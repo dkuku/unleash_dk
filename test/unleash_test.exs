@@ -133,9 +133,9 @@ defmodule UnleashTest do
   describe "start/1" do
     test "it should listen to configuration when starting the supervisor tree" do
       Unleash.ClientMock
-      |> expect(:register_client, fn -> %Mojito.Response{} end)
-      |> stub(:features, fn _ -> %Mojito.Response{} end)
-      |> stub(:metrics, fn _ -> %Mojito.Response{} end)
+      |> expect(:register_client, fn -> %Req.Response{} end)
+      |> stub(:features, fn _ -> %Req.Response{} end)
+      |> stub(:metrics, fn _ -> %Req.Response{} end)
 
       Application.put_env(:unleash_fresha, Unleash, client: Unleash.ClientMock)
       {:ok, pid} = Unleash.start(:normal, [])
@@ -148,8 +148,8 @@ defmodule UnleashTest do
 
     test "it shouldn't start the metrics server if disabled" do
       Unleash.ClientMock
-      |> expect(:register_client, fn -> %Mojito.Response{} end)
-      |> stub(:features, fn _ -> %Mojito.Response{} end)
+      |> expect(:register_client, fn -> %Req.Response{} end)
+      |> stub(:features, fn _ -> %Req.Response{} end)
 
       Application.put_env(:unleash_fresha, Unleash, disable_metrics: true, client: Unleash.ClientMock)
       {:ok, pid} = Unleash.start(:normal, [])
