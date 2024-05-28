@@ -68,18 +68,14 @@ defmodule Unleash.ClientTest do
 
     test "publishes stop event with an error" do
       Req.Test.stub(Unleash.Client, fn conn ->
-        # TODO change to transport error after req 0.5 is released
-        # Req.Test.transport_error(conn, :econnrefused)
-
-        exception = Mint.TransportError.message(%Mint.TransportError{reason: :timeout})
-        put_in(conn.private[:req_test_exception], exception)
+        Req.Test.transport_error(conn, :econnrefused)
       end)
 
       attach_telemetry_event([:unleash, :client, :fetch_features, :stop])
 
-      assert {nil, :connection_error} = Client.features()
+      assert {nil, :econnrefused} = Client.features()
       assert_received {:telemetry_metadata, metadata}
-      assert :connection_error == metadata[:error]
+      assert :econnrefused == metadata[:error]
     end
 
     test "publishes exception event" do
@@ -162,20 +158,16 @@ defmodule Unleash.ClientTest do
 
     test "publishes stop with an error event" do
       Req.Test.stub(Unleash.Client, fn conn ->
-        # TODO change to transport error after req 0.5 is released
-        # Req.Test.transport_error(conn, :econnrefused)
-
-        exception = Mint.TransportError.message(%Mint.TransportError{reason: :timeout})
-        put_in(conn.private[:req_test_exception], exception)
+        Req.Test.transport_error(conn, :econnrefused)
       end)
 
       attach_telemetry_event([:unleash, :client, :register, :stop])
 
-      assert {:error, :connection_error} = Client.register_client()
+      assert {:error, :econnrefused} = Client.register_client()
 
       assert_received {:telemetry_metadata, metadata}
 
-      assert :connection_error = metadata[:error]
+      assert :econnrefused = metadata[:error]
     end
 
     test "publishes exception event with measurements" do
@@ -266,19 +258,15 @@ defmodule Unleash.ClientTest do
 
     test "publishes stop with an error event" do
       Req.Test.stub(Unleash.Client, fn conn ->
-        # TODO change to transport error after req 0.5 is released
-        # Req.Test.transport_error(conn, :econnrefused)
-
-        exception = Mint.TransportError.message(%Mint.TransportError{reason: :timeout})
-        put_in(conn.private[:req_test_exception], exception)
+        Req.Test.transport_error(conn, :econnrefused)
       end)
 
       attach_telemetry_event([:unleash, :client, :register, :stop])
 
-      assert {:error, :connection_error} = Client.register_client()
+      assert {:error, :econnrefused} = Client.register_client()
       assert_received {:telemetry_metadata, metadata}
 
-      assert :connection_error = metadata[:error]
+      assert :econnrefused = metadata[:error]
     end
 
     test "publishes exception event with measurements" do

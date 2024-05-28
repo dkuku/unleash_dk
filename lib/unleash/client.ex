@@ -31,16 +31,12 @@ defmodule Unleash.Client do
       |> Keyword.merge(@unleash_config)
       |> Req.request()
       |> case do
-        {:ok, %{body: nil}} ->
-          error = :connection_error
-          {{nil, error}, Map.put(start_metadata, :error, error)}
-
         {:ok, response} ->
           {result, metadata} = handle_feature_response(response)
           {result, Map.merge(start_metadata, metadata)}
 
         {:error, error} ->
-          {{nil, error}, Map.put(start_metadata, :error, error)}
+          {{nil, error.reason}, Map.put(start_metadata, :error, error.reason)}
       end
     end)
   end
@@ -129,9 +125,8 @@ defmodule Unleash.Client do
       {:ok, %Req.Response{status: status} = response} when is_integer(status) ->
         {{:ok, response}, %{http_response_status: status}}
 
-      {:ok, %Req.Response{}} ->
-        e = :connection_error
-        {{:error, e}, %{error: e}}
+      {:error, error} ->
+        {{:error, error.reason}, %{error: error.reason}}
     end
   end
 
