@@ -62,8 +62,9 @@ config :unleash_fresha, Unleash,
   custom_http_headers: [], # A keyword list of custom headers to send to the server
   disable_client: false, # Whether or not to enable the client
   disable_metrics: false, # Whether or not to send metrics,
-  retries: -1 # How many times to retry on failure, -1 disables limit
-  app_env: :dev # Which environment we're in
+  retries: -1, # How many times to retry on failure, -1 disables limit
+  app_env: :dev, # Which environment we're in
+  context: [] # initial context, Either list or map. Can be used to set constant values in context. Example: [namespace: System.get_env("NAMESPACE")]
 ```
 
 `:custom_http_headers` should follow the format prescribed by

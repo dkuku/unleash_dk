@@ -15,11 +15,16 @@ defmodule Unleash.Config do
     retries: -1,
     client: Unleash.Client,
     http_client: Req,
-    app_env: :test
+    app_env: :test,
+    context: []
   ]
 
   def url do
     Keyword.fetch!(application_env(), :url)
+  end
+
+  def context do
+    Keyword.fetch!(application_env(), :context)
   end
 
   def test? do
@@ -90,7 +95,7 @@ defmodule Unleash.Config do
     Keyword.fetch!(application_env(), :http_client)
   end
 
-  defp application_env do
+  def application_env do
     config =
       __MODULE__
       |> Application.get_application()

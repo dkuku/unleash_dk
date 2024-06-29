@@ -159,7 +159,7 @@ defmodule Unleash do
     {result, metadata} =
       with {_, false} <- {:disable, Config.disable_client()},
            {_, feature} when not is_nil(feature) <- {:feature, Repo.get_feature(name)} do
-        context = Map.put(context, :feature_toggle, feature.name)
+        context = enhance_context(context, feature.name)
 
         {result, strategy_evaluations} =
           Feature.enabled?(feature, context)
@@ -179,5 +179,25 @@ defmodule Unleash do
       end
 
     {result, start_metadata |> Map.put(:result, result) |> Map.merge(metadata)}
+  end
+
+  def enhance_context(context, feature_name) do
+    case Unleash.Config.context() do
+      [] ->
+        Map.put(context, :feature_toggle, feature_name)
+
+      initial_context when is_list(initial_context) ->
+        context
+        |> Map.put(:feature_toggle, feature_name)
+        |> Map.merge(Map.new(initial_context))
+
+      %{} = initial_context ->
+        context
+        |> Map.put(:feature_toggle, feature_name)
+        |> Map.merge(initial_context)
+
+      other ->
+        raise "initial context should be a map, got: #{inspect(other)}"
+    end
   end
 end

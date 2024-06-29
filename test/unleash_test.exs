@@ -11,6 +11,13 @@ defmodule UnleashTest do
       refute Unleash.enabled?(:test1, true)
     end
 
+    test "should accept context keys from config" do
+      Application.put_env(:unleash_fresha, Unleash, context: [user_id: 1])
+      assert Unleash.enabled?(:test1, false)
+      Application.put_env(:unleash_fresha, Unleash, context: [user_id: 2])
+      refute Unleash.enabled?(:test1, false)
+    end
+
     test "should emit evaluation series on stop when applicable" do
       Application.put_env(:unleash_fresha, Unleash, [])
 

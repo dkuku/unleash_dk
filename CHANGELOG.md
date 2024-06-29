@@ -1,6 +1,9 @@
 # Changelog
 
 <!-- %% CHANGELOG_ENTRIES %% -->
+## 1.10.2 - 2024-06-29
+* allow to set constats in context
+
 ## 1.10.0 - 2024-05-20
 * replace Mojito with Req
 
