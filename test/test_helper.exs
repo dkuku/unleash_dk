@@ -1,8 +1,8 @@
-:unleash_fresha
+:unleash_dk
 |> Application.load()
 |> case do
-  :ok -> :unleash_fresha
-  {:error, {:already_loaded, :unleash_fresha}} -> :unleash_fresha
+  :ok -> :unleash_dk
+  {:error, {:already_loaded, :unleash_dk}} -> :unleash_dk
 end
 |> Application.spec(:applications)
 |> Enum.each(fn app -> Application.ensure_all_started(app) end)

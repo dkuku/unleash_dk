@@ -35,7 +35,7 @@ by adding `unleash_ex` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:unleash_fresha, "~> 1.9"}
+    {:unleash_dk, "~> 1.9"}
   ]
 end
 ```
@@ -43,7 +43,7 @@ end
 ## Migrating from unleash
 
 - change the package name in mix.exs
-- rename `:uneash` to `:unleash_fresha` in config files
+- rename `:uneash` to `:unleash_dk` in config files
 
 ## Configuration
 
@@ -51,7 +51,7 @@ There are many configuration options available, and they are listed below with
 their defaults. These go into the relevant `config/*.exs` file.
 
 ```elixir
-config :unleash_fresha, Unleash,
+config :unleash_dk, Unleash,
   url: "", # The URL of the Unleash server to connect to, should include up to http://base.url/api
   appname: "", # The app name, used for registration
   instance_id: "", # The instance ID, used for metrics tracking
@@ -114,7 +114,7 @@ configuration:
 1. Configure your application to use your new strategies list.
 
     ```elixir
-    config :unleash_fresha, Unleash, strategies: MyApp.Strategies
+    config :unleash_dk, Unleash, strategies: MyApp.Strategies
     ```
 
 ## Telemetry events

@@ -9,7 +9,7 @@ defmodule Unleash.RepoTest do
   @schedule_event [:unleash, :repo, :schedule]
 
   setup do
-    default_config = Application.get_env(:unleash_fresha, Unleash, [])
+    default_config = Application.get_env(:unleash_dk, Unleash, [])
 
     test_config =
       Keyword.merge(default_config,
@@ -20,7 +20,7 @@ defmodule Unleash.RepoTest do
         features_period: 1000
       )
 
-    Application.put_env(:unleash_fresha, Unleash, test_config)
+    Application.put_env(:unleash_dk, Unleash, test_config)
 
     stop_supervised(Unleash.Repo)
 

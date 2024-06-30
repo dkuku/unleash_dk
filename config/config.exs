@@ -10,11 +10,11 @@ import Config
 
 # You can configure your application as:
 #
-#     config :unleash_fresha, key: :value
+#     config :unleash_dk, key: :value
 #
 # and access this configuration in your application as:
 #
-#     Application.get_env(:unleash_fresha, :key)
+#     Application.get_env(:unleash_dk, :key)
 #
 # You can also configure a third-party app:
 #

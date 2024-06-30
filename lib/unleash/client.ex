@@ -8,7 +8,7 @@ defmodule Unleash.Client do
   @callback register_client() :: Req.Response.t()
   @callback metrics(map()) :: Req.Response.t()
 
-  @unleash_config Application.compile_env(:unleash_fresha, :unleash_req_options, [])
+  @unleash_config Application.compile_env(:unleash_dk, :unleash_req_options, [])
   @appname "UNLEASH-APPNAME"
   @instance_id "UNLEASH-INSTANCEID"
   @if_none_match "If-None-Match"

@@ -14,7 +14,7 @@ defmodule Unleash.Strategies do
   and then setting it in your configuration:
 
   ```elixir
-  config :unleash_fresha, Unleash, strategies: MyApp.Strategies
+  config :unleash_dk, Unleash, strategies: MyApp.Strategies
   ```
   """
 

@@ -3,11 +3,11 @@ defmodule Unleash.MixProject do
   use Mix.Project
 
   @original_gitlab_url "https://www.gitlab.com/afontaine/unleash_ex"
-  @github_url "https://www.github.com/surgeventures/unleash_fresha"
+  @github_url "https://www.github.com/surgeventures/unleash_dk"
 
   def project do
     [
-      app: :unleash_fresha,
+      app: :unleash_dk,
       version: "VERSION" |> File.read!() |> String.trim(),
       elixir: "~> 1.14",
       elixirc_paths: elixirc_paths(Mix.env()),
