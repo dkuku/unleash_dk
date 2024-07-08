@@ -182,22 +182,21 @@ defmodule Unleash do
   end
 
   def enhance_context(context, feature_name) do
-    case Unleash.Config.context() do
-      [] ->
-        Map.put(context, :feature_toggle, feature_name)
+    case Unleash.Config.default_context() do
 
-      initial_context when is_list(initial_context) ->
-        context
+      initial_context when is_list(initial_context) and initial_context != [] ->
+        initial_context
+        |> Map.new()
         |> Map.put(:feature_toggle, feature_name)
-        |> Map.merge(Map.new(initial_context))
+        |> Map.merge(context)
 
       %{} = initial_context ->
-        context
+        initial_context
         |> Map.put(:feature_toggle, feature_name)
-        |> Map.merge(initial_context)
+        |> Map.merge(context)
 
-      other ->
-        raise "initial context should be a map, got: #{inspect(other)}"
+      _empty_or_invalid ->
+        Map.put(context, :feature_toggle, feature_name)
     end
   end
 end

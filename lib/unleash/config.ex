@@ -23,7 +23,7 @@ defmodule Unleash.Config do
     Keyword.fetch!(application_env(), :url)
   end
 
-  def context do
+  def default_context do
     Keyword.fetch!(application_env(), :context)
   end
 
